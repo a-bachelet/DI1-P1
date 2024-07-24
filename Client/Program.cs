@@ -1,1 +1,1 @@
-﻿Console.WriteLine("Hello, WhySoSerious!");
+Console.WriteLine("Hello, WhySoSerious!");

@@ -1,0 +1,90 @@
+# Top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+# C# files
+[*.cs]
+# Basic Formatting
+indent_style = space
+indent_size = 4
+
+# Organize usings
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
+
+# New line options
+csharp_new_line_before_open_brace = all
+csharp_new_line_between_method_declaration_and_open_brace = true
+csharp_new_line_between_query_expression_clauses = true
+
+# Expression-bodied members
+csharp_style_expression_bodied_methods = false:suggestion
+csharp_style_expression_bodied_constructors = false:suggestion
+csharp_style_expression_bodied_operators = false:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_expression_bodied_indexers = true:suggestion
+csharp_style_expression_bodied_accessors = true:suggestion
+
+# Var usage
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+# Naming conventions
+dotnet_naming_rule.interface_should_be_prefixed_with_I.severity = suggestion
+dotnet_naming_rule.interface_should_be_prefixed_with_I.symbols = interfaces
+dotnet_naming_rule.interface_should_be_prefixed_with_I.style = prefix_with_I
+
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_symbols.interfaces.applicable_accessibilities = *
+dotnet_naming_symbols.interfaces.required_modifiers = *
+
+dotnet_naming_style.prefix_with_I.capitalization = pascal_case
+dotnet_naming_style.prefix_with_I.required_prefix = I
+
+# Code styles
+csharp_prefer_braces = true:suggestion
+csharp_space_after_cast = true
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_after_comma = true
+csharp_space_after_dot = false
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_around_declaration_statements = false
+
+# Enforce file-scoped namespace declarations
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# Null-checking
+csharp_style_conditional_delegate_call = true:suggestion
+
+# Using directives inside namespace
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# Prefer null-propagation
+csharp_style_null_propagation = true:suggestion
+
+# Prefer object initializers
+csharp_style_object_initializer = true:suggestion
+
+# Prefer collection initializers
+csharp_style_collection_initializer = true:suggestion
+
+# Prefer using declaration
+csharp_prefer_simple_using_statement = true:suggestion
+
+# Enforce language version
+dotnet_language_version = latest

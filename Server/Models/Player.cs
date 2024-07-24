@@ -1,12 +1,12 @@
-﻿namespace Server.Models;
+namespace Server.Models;
 
 public class Player(string name, int gameId)
 {
-  public int Id { get; }
+    public int Id { get; }
 
-  public string Name { get; } = name;
+    public string Name { get; } = name;
 
-  public int GameId { get; } = gameId;
+    public int GameId { get; } = gameId;
 
-  public Game Game { get; } = null!;
+    public Game Game { get; } = null!;
 }

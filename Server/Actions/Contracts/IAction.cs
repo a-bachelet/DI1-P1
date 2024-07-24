@@ -1,6 +1,6 @@
-﻿namespace Server.Actions.Contracts;
+namespace Server.Actions.Contracts;
 
 public interface IAction<T, U>
 {
-  Task<U> PerformAsync(T actionParams);
+    Task<U> PerformAsync(T actionParams);
 }
