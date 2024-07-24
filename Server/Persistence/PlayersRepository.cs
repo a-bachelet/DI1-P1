@@ -14,7 +14,10 @@ public class PlayersRepository(WssDbContext context) : IPlayersRepository
 
     public async Task SavePlayer(Player player)
     {
-        await context.AddAsync(player);
+        if (player.Id is null) {
+            await context.AddAsync(player);
+        }
+        
         await context.SaveChangesAsync();
     }
 }

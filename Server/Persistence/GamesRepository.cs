@@ -25,7 +25,10 @@ public class GamesRepository(WssDbContext context) : IGamesRepository
 
     public async Task SaveGame(Game game)
     {
-        await context.AddAsync(game);
+        if (game.Id is null) {
+            await context.AddAsync(game);
+        }
+        
         await context.SaveChangesAsync();
     }
 }

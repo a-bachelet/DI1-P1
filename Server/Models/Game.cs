@@ -9,7 +9,7 @@ public enum GameStatus
 
 public class Game(string name, int rounds = 15)
 {
-    public int Id { get; private set; }
+    public int? Id { get; private set; }
 
     public string Name { get; set; } = name;
 
@@ -19,8 +19,13 @@ public class Game(string name, int rounds = 15)
 
     public ICollection<Player> Players { get; } = [];
 
-    public bool IsJoinable()
+    public bool CanBeJoined()
     {
         return Players.Count < 3;
+    }
+
+    public bool CanBeStarted()
+    {
+        return Status == GameStatus.Waiting;
     }
 }

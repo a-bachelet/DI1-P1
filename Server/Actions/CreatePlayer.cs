@@ -53,7 +53,7 @@ public class CreatePlayer(
 
         var game = await gamesRepository.GetById(gameId);
 
-        if (!game!.IsJoinable())
+        if (!game!.CanBeJoined())
         {
             return Result.Fail("Game is full and cannot be joined.");
         }
