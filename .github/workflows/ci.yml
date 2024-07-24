@@ -7,18 +7,44 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-      runs-on: ubuntu-latest
+  code_quality:
+    runs-on: ubuntu-latest
 
-      steps:
+    steps:
+    - name: Code checkout
+      uses: actions/checkout@v4
+
+    - name: .NET setup
+      uses: actions/setup-dotnet@v4
+      with:
+        cache: true
+
+    - name: Dependencies restoration
+      run: dotnet restore --locked-mode
+
+    - name: Code style enforcement
+      run: dotnet format --verify-no-changes
+  
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Code checkout
         uses: actions/checkout@v4
 
       - name: .NET setup
         uses: actions/setup-dotnet@v4
+        with:
+          cache: true
 
-      - name: Dependencies restoration
-        run: dotnet restore
+      - name: Solution build
+        run: dotnet build --no-restore --configuration Release
 
-      - name: Static code analysis
-        run: dotnet format --verify-no-changes
+      - name: XUnit tests
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+      
+      - name: Publish code coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: "**/coverage.opencover.xml"
