@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+using Npgsql.NameTranslation;
 
 using Server.Models;
 
@@ -26,12 +29,18 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum("public", "game_status", ["Waiting", "InProgress", "Finished"]);
+
         modelBuilder.Entity<Game>(e =>
         {
             e.ToTable("games");
             e.HasKey(e => e.Id);
-            e.Property(e => e.Name).HasColumnType("VARCHAR(255)");
-            e.Property(e => e.Rounds).HasColumnType("INTEGER");
+            e.Property(e => e.Name).HasColumnType("varchar(255)");
+            e.Property(e => e.Rounds).HasColumnType("integer");
+            e.Property(e => e.Status)
+                .HasColumnType("game_status")
+                .HasDefaultValue(GameStatus.Waiting)
+                .HasConversion(new EnumToStringConverter<GameStatus>());
             e.HasMany(e => e.Players).WithOne(e => e.Game).HasForeignKey(e => e.GameId);
         });
 
@@ -39,7 +48,7 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
         {
             e.ToTable("players");
             e.HasKey(e => e.Id);
-            e.Property(e => e.Name).HasColumnType("VARCHAR(255)");
+            e.Property(e => e.Name).HasColumnType("varchar(255)");
             e.HasOne(e => e.Game).WithMany(e => e.Players).HasForeignKey(e => e.GameId);
         });
     }
