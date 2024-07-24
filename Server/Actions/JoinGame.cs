@@ -2,7 +2,8 @@ using Server.Persistence.Contracts;
 
 namespace Server.Actions;
 
-public sealed record JoinGameParams(string PlayerName, int GameId) : CreatePlayerParams(PlayerName, GameId);
+public sealed record JoinGameParams(string PlayerName, string CompanyName, int GameId) :
+  CreatePlayerParams(PlayerName, CompanyName, GameId);
 
 public class JoinGameValidator(
   IGamesRepository gamesRepository,
@@ -13,9 +14,11 @@ public class JoinGameValidator(
 );
 
 public class JoinGame(
+  ICompaniesRepository companiesRepository,
   IGamesRepository gamesRepository,
   IPlayersRepository playersRepository
 ) : CreatePlayer(
+  companiesRepository,
   gamesRepository,
   playersRepository
 );

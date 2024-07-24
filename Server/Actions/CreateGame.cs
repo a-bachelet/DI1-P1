@@ -8,7 +8,7 @@ using Server.Persistence.Contracts;
 
 namespace Server.Actions;
 
-public sealed record CreateGameParams(string GameName, string PlayerName, int Rounds = 15);
+public sealed record CreateGameParams(string GameName, string PlayerName, string CompanyName, int Rounds = 15);
 
 public class CreateGameValidator : AbstractValidator<CreateGameParams>
 {
@@ -24,6 +24,10 @@ public class CreateGameValidator : AbstractValidator<CreateGameParams>
           .NotNull()
           .NotEmpty();
 
+        RuleFor(actionParams => actionParams.CompanyName)
+          .NotNull()
+          .NotEmpty();
+
         RuleFor(actionParams => actionParams.Rounds)
           .NotNull()
           .GreaterThanOrEqualTo(15);
@@ -31,6 +35,7 @@ public class CreateGameValidator : AbstractValidator<CreateGameParams>
 }
 
 public class CreateGame(
+  ICompaniesRepository companiesRepository,
   IGamesRepository gamesRepository,
   IPlayersRepository playersRepository
 ) : IAction<CreateGameParams, Result<Game>>
@@ -45,14 +50,14 @@ public class CreateGame(
             return Result.Fail(actionValidationResult.Errors.Select(e => e.ErrorMessage));
         }
 
-        var (gameName, playerName, rounds) = actionParams;
+        var (gameName, playerName, companyName, rounds) = actionParams;
 
         var game = new Game(gameName, rounds);
 
         await gamesRepository.SaveGame(game);
 
-        var createPlayer = new CreatePlayer(gamesRepository, playersRepository);
-        var createPlayerParams = new CreatePlayerParams(playerName, game.Id);
+        var createPlayer = new CreatePlayer(companiesRepository, gamesRepository, playersRepository);
+        var createPlayerParams = new CreatePlayerParams(playerName, companyName, game.Id!.Value);
         var createPlayerResult = await createPlayer.PerformAsync(createPlayerParams);
 
         if (createPlayerResult.IsFailed)

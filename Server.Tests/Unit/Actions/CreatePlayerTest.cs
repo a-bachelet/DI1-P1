@@ -10,24 +10,73 @@ namespace Server.Tests.Unit.Actions;
 
 public class CreatePlayerTest
 {
+    private readonly Mock<ICompaniesRepository> _companiesRepositoryMock;
     private Mock<IGamesRepository> _gamesRepositoryMock;
     private Mock<IPlayersRepository> _playersRepositoryMock;
 
     public CreatePlayerTest()
     {
+        _companiesRepositoryMock = new Mock<ICompaniesRepository>();
         _gamesRepositoryMock = new Mock<IGamesRepository>();
         _playersRepositoryMock = new Mock<IPlayersRepository>();
 
-        _gamesRepositoryMock.Setup(x => x.GameExists(It.IsAny<int>())).Returns(Task.Run(() => true));
-        _gamesRepositoryMock.Setup(x => x.GetById(It.IsAny<int>())).Returns(Task.Run(() => new Game("Game 1")));
-        _playersRepositoryMock.Setup(x => x.IsPlayerNameAvailable(It.IsAny<string>(), It.IsAny<int>())).Returns(Task.Run(() => true));
+        _companiesRepositoryMock
+          .Setup(x => x.IsCompanyNameAvailable(It.IsAny<string>(), It.IsAny<int>()))
+          .Returns(Task.Run(() => true));
+
+        _companiesRepositoryMock
+          .Setup(x => x.SaveCompany(It.IsAny<Company>()))
+          .Returns((Company company) => Task.Run(() =>
+          {
+              typeof(Company).GetProperty("Id")?.SetValue(company, 1);
+          }));
+
+        _gamesRepositoryMock
+          .Setup(x => x.GameExists(It.IsAny<int>()))
+          .Returns(Task.Run(() => true));
+        
+        _gamesRepositoryMock
+          .Setup(x => x.GetById(It.IsAny<int>()))
+          .Returns(Task.Run(() => new Game("Game 1")));
+        
+        _gamesRepositoryMock
+          .Setup(x => x.GetByPlayerId(It.IsAny<int>()))
+          .Returns(Task.Run(() => {
+            var game = new Game("Game 1");
+            typeof(Game).GetProperty("Id")?.SetValue(game, 1);
+            return game;
+          }));
+
+
+        _playersRepositoryMock
+          .Setup(x => x.PlayerExists(It.IsAny<int>()))
+          .Returns(Task.Run(() => true));
+        
+        _playersRepositoryMock
+          .Setup(x => x.IsPlayerNameAvailable(It.IsAny<string>(), It.IsAny<int>()))
+          .Returns(Task.Run(() => true));
+
+        _playersRepositoryMock
+          .Setup(x => x.GetById(It.IsAny<int>()))
+          .Returns(Task.Run(() => new Player("Game 1", 1)));
+
+        _playersRepositoryMock
+          .Setup(x => x.SavePlayer(It.IsAny<Player>()))
+          .Returns((Player player) => Task.Run(() =>
+          {
+              typeof(Player).GetProperty("Id")?.SetValue(player, 1);
+          }));
     }
 
     [Fact]
     public async Task ItShouldNotCreatePlayerWithoutAPlayerName()
     {
-        var actionParams = new CreatePlayerParams("", 1);
-        var action = new CreatePlayer(_gamesRepositoryMock.Object, _playersRepositoryMock.Object);
+        var actionParams = new CreatePlayerParams("", "Company 1", 1);
+        var action = new CreatePlayer(
+          _companiesRepositoryMock.Object,
+          _gamesRepositoryMock.Object,
+          _playersRepositoryMock.Object
+        );
 
         var actionResult = await action.PerformAsync(actionParams);
 
@@ -41,8 +90,12 @@ public class CreatePlayerTest
     {
         _gamesRepositoryMock.Setup(x => x.GameExists(It.IsAny<int>())).Returns(Task.Run(() => false));
 
-        var actionParams = new CreatePlayerParams("Player 1", 1);
-        var action = new CreatePlayer(_gamesRepositoryMock.Object, _playersRepositoryMock.Object);
+        var actionParams = new CreatePlayerParams("Player 1", "Company 1", 1);
+        var action = new CreatePlayer(
+          _companiesRepositoryMock.Object,
+          _gamesRepositoryMock.Object,
+          _playersRepositoryMock.Object
+        );
 
         var actionResult = await action.PerformAsync(actionParams);
 
@@ -56,8 +109,12 @@ public class CreatePlayerTest
     {
         _playersRepositoryMock.Setup(x => x.IsPlayerNameAvailable(It.IsAny<string>(), It.IsAny<int>())).Returns(Task.Run(() => false));
 
-        var actionParams = new CreatePlayerParams("Player 1", 1);
-        var action = new CreatePlayer(_gamesRepositoryMock.Object, _playersRepositoryMock.Object);
+        var actionParams = new CreatePlayerParams("Player 1", "Company 1", 1);
+        var action = new CreatePlayer(
+          _companiesRepositoryMock.Object,
+          _gamesRepositoryMock.Object,
+          _playersRepositoryMock.Object
+        );
 
         var actionResult = await action.PerformAsync(actionParams);
 
@@ -69,8 +126,12 @@ public class CreatePlayerTest
     [Fact]
     public async Task ItShouldCreatePlayerWithValidData()
     {
-        var actionParams = new CreatePlayerParams("Player 1", 1);
-        var action = new CreatePlayer(_gamesRepositoryMock.Object, _playersRepositoryMock.Object);
+        var actionParams = new CreatePlayerParams("Player 1", "Company 1", 1);
+        var action = new CreatePlayer(
+          _companiesRepositoryMock.Object,
+          _gamesRepositoryMock.Object,
+          _playersRepositoryMock.Object
+        );
 
         var actionResult = await action.PerformAsync(actionParams);
 

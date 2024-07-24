@@ -8,7 +8,7 @@ using Server.Persistence.Contracts;
 
 namespace Server.Actions;
 
-public record CreatePlayerParams(string PlayerName, int GameId);
+public record CreatePlayerParams(string PlayerName, string CompanyName, int GameId);
 
 public class CreatePlayerValidator : AbstractValidator<CreatePlayerParams>
 {
@@ -18,6 +18,10 @@ public class CreatePlayerValidator : AbstractValidator<CreatePlayerParams>
     )
     {
         RuleFor(actionParams => actionParams.PlayerName)
+          .NotNull()
+          .NotEmpty();
+
+        RuleFor(actionParams => actionParams.CompanyName)
           .NotNull()
           .NotEmpty();
 
@@ -35,6 +39,7 @@ public class CreatePlayerValidator : AbstractValidator<CreatePlayerParams>
 }
 
 public class CreatePlayer(
+  ICompaniesRepository companiesRepository,
   IGamesRepository gamesRepository,
   IPlayersRepository playersRepository
 ) : IAction<CreatePlayerParams, Result<Player>>
@@ -49,7 +54,7 @@ public class CreatePlayer(
             return Result.Fail(actionValidationResult.Errors.Select(e => e.ErrorMessage));
         }
 
-        var (playerName, gameId) = actionParams;
+        var (playerName, companyName, gameId) = actionParams;
 
         var game = await gamesRepository.GetById(gameId);
 
@@ -61,6 +66,15 @@ public class CreatePlayer(
         var player = new Player(playerName, gameId);
 
         await playersRepository.SavePlayer(player);
+
+        var createCompany = new CreateCompany(companiesRepository, gamesRepository, playersRepository);
+        var createCompanyParams = new CreateCompanyParams(companyName, player.Id!.Value);
+        var createCompanyResult = await createCompany.PerformAsync(createCompanyParams);
+
+        if (createCompanyResult.IsFailed)
+        {
+            return Result.Fail(createCompanyResult.Errors);
+        }
 
         return Result.Ok(player);
     }

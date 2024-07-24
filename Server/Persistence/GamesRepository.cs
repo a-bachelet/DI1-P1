@@ -23,12 +23,27 @@ public class GamesRepository(WssDbContext context) : IGamesRepository
         return await context.Games.FindAsync(gameId);
     }
 
+    public async Task<Game?> GetByPlayerId(int playerId)
+    {
+        return await context.Games
+            .Join(
+                context.Players,
+                game => game.Id,
+                player => player.GameId,
+                (game, player) => new { Game = game, Player = player }
+            )
+            .Where(res => res.Player.Id == playerId)
+            .Select(res => res.Game)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task SaveGame(Game game)
     {
-        if (game.Id is null) {
+        if (game.Id is null)
+        {
             await context.AddAsync(game);
         }
-        
+
         await context.SaveChangesAsync();
     }
 }

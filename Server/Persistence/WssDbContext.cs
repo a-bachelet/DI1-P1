@@ -9,6 +9,7 @@ namespace Server.Persistence;
 
 public class WssDbContext(DbContextOptions options, IConfiguration configuration) : DbContext(options)
 {
+    public DbSet<Company> Companies { get; set; } = null!;
     public DbSet<Game> Games { get; set; } = null!;
     public DbSet<Player> Players { get; set; } = null!;
 
@@ -31,6 +32,18 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
     {
         modelBuilder.HasPostgresEnum("public", "game_status", ["Waiting", "InProgress", "Finished"]);
 
+        modelBuilder.Entity<Company>(e =>
+        {
+            e.ToTable("companies");
+            e.HasKey(e => e.Id);
+            e.Property(e => e.Name).HasColumnType("varchar(255)");
+            e.HasOne(e => e.Player)
+                .WithOne(e => e.Company)
+                .HasForeignKey<Company>(e => e.PlayerId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<Game>(e =>
         {
             e.ToTable("games");
@@ -41,7 +54,7 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
                 .HasColumnType("game_status")
                 .HasDefaultValue(GameStatus.Waiting)
                 .HasConversion(new EnumToStringConverter<GameStatus>());
-            e.HasMany(e => e.Players).WithOne(e => e.Game).HasForeignKey(e => e.GameId);
+            e.OwnsMany(e => e.Players).WithOwner(e => e.Game).HasForeignKey(e => e.GameId);
         });
 
         modelBuilder.Entity<Player>(e =>
@@ -49,7 +62,14 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
             e.ToTable("players");
             e.HasKey(e => e.Id);
             e.Property(e => e.Name).HasColumnType("varchar(255)");
-            e.HasOne(e => e.Game).WithMany(e => e.Players).HasForeignKey(e => e.GameId);
+            e.HasOne(e => e.Game)
+                .WithMany(e => e.Players)
+                .HasForeignKey(e => e.GameId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            e.OwnsOne(e => e.Company)
+                .WithOwner(e => e.Player)
+                .HasForeignKey(e => e.PlayerId);
         });
     }
 }

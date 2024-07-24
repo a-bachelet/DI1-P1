@@ -12,12 +12,23 @@ public class PlayersRepository(WssDbContext context) : IPlayersRepository
         return !await context.Players.AnyAsync(player => player.Name == playerName && player.GameId == gameId);
     }
 
+    public async Task<bool> PlayerExists(int playerId)
+    {
+        return await context.Players.AnyAsync(player => player.Id == playerId);
+    }
+
+    public async Task<Player?> GetById(int playerId)
+    {
+        return await context.Players.FindAsync(playerId);
+    }
+
     public async Task SavePlayer(Player player)
     {
-        if (player.Id is null) {
+        if (player.Id is null)
+        {
             await context.AddAsync(player);
         }
-        
+
         await context.SaveChangesAsync();
     }
 }
