@@ -41,7 +41,14 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: XUnit tests
-        run: dotnet test --no-build --configuration Release --verbosity normal --logger trx --collect:"XPlat Code Coverage"
+        run: |
+          dotnet test \
+          --no-build \
+          --configuration Release \
+          --verbosity normal \
+          --logger trx \
+          --collect:"XPlat Code Coverage" \
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include="[*]Server.Actions*"
       
       - name: Coverage reports combination
         uses: danielpalme/ReportGenerator-GitHub-Action@5.3.8
