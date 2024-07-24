@@ -35,6 +35,10 @@ public class CreateGameTest
               typeof(Game).GetProperty("Id")?.SetValue(game, 1);
           }));
 
+        _gamesRepositoryMock
+          .Setup(x => x.GetById(It.IsAny<int>()))
+          .Returns(Task.Run(() => new Game("Game 1")));
+
         _playersRepositoryMock
           .Setup(x => x.IsPlayerNameAvailable(It.IsAny<string>(), It.IsAny<int>()))
           .Returns(Task.Run(() => true));

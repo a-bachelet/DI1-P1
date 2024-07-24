@@ -2,16 +2,13 @@ using FluentResults;
 
 using FluentValidation;
 
-using Microsoft.EntityFrameworkCore;
-
 using Server.Actions.Contracts;
 using Server.Models;
-using Server.Persistence;
 using Server.Persistence.Contracts;
 
 namespace Server.Actions;
 
-public sealed record CreatePlayerParams(string PlayerName, int GameId);
+public record CreatePlayerParams(string PlayerName, int GameId);
 
 public class CreatePlayerValidator : AbstractValidator<CreatePlayerParams>
 {
@@ -47,9 +44,19 @@ public class CreatePlayer(
         var actionValidator = new CreatePlayerValidator(gamesRepository, playersRepository);
         var actionValidationResult = await actionValidator.ValidateAsync(actionParams);
 
-        if (actionValidationResult.Errors.Count != 0) return Result.Fail(actionValidationResult.Errors.Select(e => e.ErrorMessage));
+        if (actionValidationResult.Errors.Count != 0)
+        {
+            return Result.Fail(actionValidationResult.Errors.Select(e => e.ErrorMessage));
+        }
 
         var (playerName, gameId) = actionParams;
+
+        var game = await gamesRepository.GetById(gameId);
+
+        if (!game!.IsJoinable())
+        {
+            return Result.Fail("Game is full and cannot be joined.");
+        }
 
         var player = new Player(playerName, gameId);
 

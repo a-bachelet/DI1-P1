@@ -2,11 +2,8 @@ using FluentResults;
 
 using FluentValidation;
 
-using Microsoft.EntityFrameworkCore;
-
 using Server.Actions.Contracts;
 using Server.Models;
-using Server.Persistence;
 using Server.Persistence.Contracts;
 
 namespace Server.Actions;
@@ -43,7 +40,10 @@ public class CreateGame(
         var actionValidator = new CreateGameValidator(gamesRepository);
         var actionValidationResult = await actionValidator.ValidateAsync(actionParams);
 
-        if (actionValidationResult.Errors.Count != 0) return Result.Fail(actionValidationResult.Errors.Select(e => e.ErrorMessage));
+        if (actionValidationResult.Errors.Count != 0)
+        {
+            return Result.Fail(actionValidationResult.Errors.Select(e => e.ErrorMessage));
+        }
 
         var (gameName, playerName, rounds) = actionParams;
 
@@ -55,7 +55,10 @@ public class CreateGame(
         var createPlayerParams = new CreatePlayerParams(playerName, game.Id);
         var createPlayerResult = await createPlayer.PerformAsync(createPlayerParams);
 
-        if (createPlayerResult.IsFailed) return Result.Fail(createPlayerResult.Errors);
+        if (createPlayerResult.IsFailed)
+        {
+            return Result.Fail(createPlayerResult.Errors);
+        }
 
         return Result.Ok(game);
     }

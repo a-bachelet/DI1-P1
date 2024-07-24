@@ -18,4 +18,9 @@ public class Game(string name, int rounds = 15)
     public GameStatus Status { get; set; } = GameStatus.Waiting;
 
     public ICollection<Player> Players { get; } = [];
+
+    public bool IsJoinable()
+    {
+        return Players.Count < 3;
+    }
 }

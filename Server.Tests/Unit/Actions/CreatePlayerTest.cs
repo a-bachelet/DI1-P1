@@ -3,6 +3,7 @@ using FluentAssertions;
 using Moq;
 
 using Server.Actions;
+using Server.Models;
 using Server.Persistence.Contracts;
 
 namespace Server.Tests.Unit.Actions;
@@ -18,6 +19,7 @@ public class CreatePlayerTest
         _playersRepositoryMock = new Mock<IPlayersRepository>();
 
         _gamesRepositoryMock.Setup(x => x.GameExists(It.IsAny<int>())).Returns(Task.Run(() => true));
+        _gamesRepositoryMock.Setup(x => x.GetById(It.IsAny<int>())).Returns(Task.Run(() => new Game("Game 1")));
         _playersRepositoryMock.Setup(x => x.IsPlayerNameAvailable(It.IsAny<string>(), It.IsAny<int>())).Returns(Task.Run(() => true));
     }
 
