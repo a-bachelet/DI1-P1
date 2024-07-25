@@ -9,4 +9,6 @@ public class Employee(string name, int companyId)
     public int CompanyId { get; set; } = companyId;
 
     public Company Company { get; set; } = null!;
+
+    public ICollection<EmployeeSkill> Skills { get; } = [];
 }

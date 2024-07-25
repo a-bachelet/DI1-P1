@@ -23,7 +23,8 @@ public class CreateEmployeeValidator : AbstractValidator<CreateEmployeeParams>
 
 public class CreateEmployee(
     ICompaniesRepository companiesRepository,
-    IEmployeesRepository employeesRepository
+    IEmployeesRepository employeesRepository,
+    ISkillsRepository skillsRepository
 ) : IAction<CreateEmployeeParams, Result<Employee>>
 {
     public async Task<Result<Employee>> PerformAsync(CreateEmployeeParams actionParams)
@@ -46,6 +47,14 @@ public class CreateEmployee(
         }
 
         var employee = new Employee(employeeName, company!.Id!.Value);
+
+        var randomSkills = await skillsRepository.GetRandomSkills(3);
+
+        foreach (var randomSkill in randomSkills)
+        {
+            var rnd = new Random();
+            employee.Skills.Add(new EmployeeSkill(randomSkill.Name, rnd.Next(11)));
+        }
 
         await employeesRepository.SaveEmployee(employee);
 

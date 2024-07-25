@@ -18,6 +18,7 @@ builder.Services.AddTransient<ICompaniesRepository, CompaniesRepository>();
 builder.Services.AddTransient<IEmployeesRepository, EmployeesRepository>();
 builder.Services.AddTransient<IGamesRepository, GamesRepository>();
 builder.Services.AddTransient<IPlayersRepository, PlayersRepository>();
+builder.Services.AddTransient<ISkillsRepository, SkillsRepository>();
 
 builder.Services.AddTransient<IAction<CreateCompanyParams, Result<Company>>, CreateCompany>();
 builder.Services.AddTransient<IAction<CreateEmployeeParams, Result<Employee>>, CreateEmployee>();

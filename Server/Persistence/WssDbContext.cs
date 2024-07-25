@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -11,6 +14,7 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
     public DbSet<Employee> Employees { get; set; } = null!;
     public DbSet<Game> Games { get; set; } = null!;
     public DbSet<Player> Players { get; set; } = null!;
+    public DbSet<Skill> Skills { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -54,6 +58,7 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
                 .HasForeignKey(e => e.CompanyId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
+            e.OwnsMany(e => e.Skills, builder => builder.ToJson());
         });
 
         modelBuilder.Entity<Game>(e =>
@@ -84,6 +89,35 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
             e.HasOne(e => e.Company)
                 .WithOne(e => e.Player)
                 .HasForeignKey<Company>(e => e.PlayerId);
+        });
+
+        modelBuilder.Entity<Skill>(e =>
+        {
+            e.ToTable("skills");
+            e.HasKey(e => e.Id);
+            e.Property(e => e.Name).HasColumnType("varchar(255)");
+            e.HasData(
+                new Skill("HTML") { Id = 1 },
+                new Skill("CSS") { Id = 2 },
+                new Skill("JavaScript") { Id = 3 },
+                new Skill("TypeScript") { Id = 4 },
+                new Skill("React") { Id = 5 },
+                new Skill("Angular") { Id = 6 },
+                new Skill("Vue.js") { Id = 7 },
+                new Skill("Node.js") { Id = 8 },
+                new Skill("Express.js") { Id = 9 },
+                new Skill("ASP.NET Core") { Id = 10 },
+                new Skill("Ruby on Rails") { Id = 11 },
+                new Skill("Django") { Id = 12 },
+                new Skill("Flask") { Id = 13 },
+                new Skill("PHP") { Id = 14 },
+                new Skill("Laravel") { Id = 15 },
+                new Skill("Spring Boot") { Id = 16 },
+                new Skill("SQL") { Id = 17 },
+                new Skill("NoSQL") { Id = 18 },
+                new Skill("GraphQL") { Id = 19 },
+                new Skill("REST APIs") { Id = 20 }
+            );
         });
     }
 }

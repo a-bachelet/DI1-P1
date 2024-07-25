@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Server.Models;
@@ -13,9 +14,11 @@ using Server.Persistence;
 namespace Server.Migrations
 {
     [DbContext(typeof(WssDbContext))]
-    partial class WssDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240725132731_create_skills")]
+    partial class create_skills
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
