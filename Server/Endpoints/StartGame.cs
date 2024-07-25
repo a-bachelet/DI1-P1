@@ -1,4 +1,4 @@
-﻿using FluentResults;
+using FluentResults;
 
 using Server.Actions;
 using Server.Actions.Contracts;
@@ -28,7 +28,8 @@ public class StartGame : IEndpoint
 
         var actionResult = await startGameAction.PerformAsync(actionParams);
 
-        if (actionResult.IsFailed) {
+        if (actionResult.IsFailed)
+        {
             await transaction.RollbackAsync();
             return Results.BadRequest(new { Errors = actionResult.Errors.Select(e => e.Message) });
         }

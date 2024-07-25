@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+
 using Microsoft.EntityFrameworkCore.Migrations;
+
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
 using Server.Models;
 
 #nullable disable

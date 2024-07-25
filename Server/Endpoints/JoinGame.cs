@@ -1,4 +1,4 @@
-﻿using FluentResults;
+using FluentResults;
 
 using Server.Actions;
 using Server.Actions.Contracts;
@@ -32,7 +32,8 @@ public class JoinGame : IEndpoint
 
         var actionResult = await joinGameAction.PerformAsync(actionParams);
 
-        if (actionResult.IsFailed) {
+        if (actionResult.IsFailed)
+        {
             await transaction.RollbackAsync();
             return Results.BadRequest(new { Errors = actionResult.Errors.Select(e => e.Message) });
         }
