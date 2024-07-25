@@ -11,6 +11,7 @@ namespace Server.Persistence;
 public class WssDbContext(DbContextOptions options, IConfiguration configuration) : DbContext(options)
 {
     public DbSet<Company> Companies { get; set; } = null!;
+    public DbSet<Consultant> Consultants { get; set; } = null!;
     public DbSet<Employee> Employees { get; set; } = null!;
     public DbSet<Game> Games { get; set; } = null!;
     public DbSet<Player> Players { get; set; } = null!;
@@ -49,17 +50,24 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
                 .HasForeignKey(e => e.CompanyId);
         });
 
+        modelBuilder.Entity<Consultant>(e =>
+        {
+            e.ToTable("consultants");
+            e.HasKey(e => e.Id);
+            e.HasDiscriminator<string>("ConsultantType")
+                .HasValue<Consultant>("Consultant")
+                .HasValue<Employee>("Employee");
+            e.Property(e => e.Name).HasColumnType("varchar(255)");
+            e.OwnsMany(e => e.Skills, builder => builder.ToJson());
+        });
+
         modelBuilder.Entity<Employee>(e =>
         {
-            e.ToTable("employees");
-            e.HasKey(e => e.Id);
-            e.Property(e => e.Name).HasColumnType("varchar(255)");
             e.HasOne(e => e.Company)
                 .WithMany(e => e.Employees)
                 .HasForeignKey(e => e.CompanyId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
-            e.OwnsMany(e => e.Skills, builder => builder.ToJson());
         });
 
         modelBuilder.Entity<Game>(e =>

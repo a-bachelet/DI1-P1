@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+
 using Microsoft.EntityFrameworkCore.Migrations;
+
 using Server.Models;
 
 #nullable disable

@@ -29,6 +29,8 @@ public class CreateEmployee(
 {
     public async Task<Result<Employee>> PerformAsync(CreateEmployeeParams actionParams)
     {
+        var rnd = new Random();
+
         var actionValidator = new CreateEmployeeValidator();
         var actionValidationResult = await actionValidator.ValidateAsync(actionParams);
 
@@ -46,13 +48,21 @@ public class CreateEmployee(
             Result.Fail($"Company with Id \"{companyId}\" not found.");
         }
 
-        var employee = new Employee(employeeName, company!.Id!.Value);
+        IEnumerable<int> salaries = Array.Empty<int>();
+
+        for (var salary = 29000; salary <= 100000; salary++)
+        {
+            salaries = salaries.Append(salary);
+        }
+
+        var randomSalary = rnd.Next(salaries.Count() + 1);
+
+        var employee = new Employee(employeeName, company!.Id!.Value, randomSalary);
 
         var randomSkills = await skillsRepository.GetRandomSkills(3);
 
         foreach (var randomSkill in randomSkills)
         {
-            var rnd = new Random();
             employee.Skills.Add(new EmployeeSkill(randomSkill.Name, rnd.Next(11)));
         }
 
