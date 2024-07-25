@@ -1,6 +1,6 @@
-![Code Coverage](https://img.shields.io/badge/Code%20Coverage-87%25-success?style=flat)
+![Code Coverage](https://img.shields.io/badge/Code%20Coverage-43%25-success?style=flat)
 
 Package | Line Rate | Branch Rate | Complexity | Health
 -------- | --------- | ----------- | ---------- | ------
-Server | 87% | 88% | 17 | ✔
-**Summary** | **87%** (65 / 75) | **88%** (7 / 8) | **17** | ✔
+Server | 43% | 37% | 64 | ✔
+**Summary** | **43%** (60 / 138) | **37%** (17 / 46) | **64** | ✔
