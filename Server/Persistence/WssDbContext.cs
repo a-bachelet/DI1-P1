@@ -38,6 +38,7 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
             e.ToTable("companies");
             e.HasKey(e => e.Id);
             e.Property(e => e.Name).HasColumnType("varchar(255)");
+            e.Property(e => e.Treasury).HasColumnType("integer").HasDefaultValue(1000000);
             e.HasOne(e => e.Player)
                 .WithOne(e => e.Company)
                 .HasForeignKey<Company>(e => e.PlayerId)
