@@ -1,24 +1,22 @@
+using FluentResults;
+
+using Server.Actions.Contracts;
+using Server.Models;
 using Server.Persistence.Contracts;
 
 namespace Server.Actions;
 
-public sealed record JoinGameParams(string PlayerName, string CompanyName, int GameId) :
-  CreatePlayerParams(PlayerName, CompanyName, GameId);
+public sealed record JoinGameParams(
+    string PlayerName,
+    string CompanyName,
+    int? GameId = null,
+    Game? Game = null
+) : CreatePlayerParams(PlayerName, CompanyName, GameId, Game);
 
-public class JoinGameValidator(
-  IGamesRepository gamesRepository,
-  IPlayersRepository playersRepository
-) : CreatePlayerValidator(
-  gamesRepository,
-  playersRepository
-);
+public class JoinGameValidator : CreatePlayerValidator;
 
 public class JoinGame(
-  ICompaniesRepository companiesRepository,
-  IGamesRepository gamesRepository,
-  IPlayersRepository playersRepository
-) : CreatePlayer(
-  companiesRepository,
-  gamesRepository,
-  playersRepository
-);
+    IGamesRepository gamesRepository,
+    IPlayersRepository playersRepository,
+    IAction<CreateCompanyParams, Result<Company>> createCompanyAction
+) : CreatePlayer(gamesRepository, playersRepository, createCompanyAction);

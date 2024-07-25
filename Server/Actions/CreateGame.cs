@@ -12,37 +12,23 @@ public sealed record CreateGameParams(string GameName, string PlayerName, string
 
 public class CreateGameValidator : AbstractValidator<CreateGameParams>
 {
-    public CreateGameValidator(IGamesRepository gamesRepository)
+    public CreateGameValidator()
     {
-        RuleFor(actionParams => actionParams.GameName)
-          .NotNull()
-          .NotEmpty()
-          .MustAsync(async (gameName, _token) => await gamesRepository.IsGameNameAvailable(gameName))
-          .WithMessage("'Game Name' is already in use.");
-
-        RuleFor(actionParams => actionParams.PlayerName)
-          .NotNull()
-          .NotEmpty();
-
-        RuleFor(actionParams => actionParams.CompanyName)
-          .NotNull()
-          .NotEmpty();
-
-        RuleFor(actionParams => actionParams.Rounds)
-          .NotNull()
-          .GreaterThanOrEqualTo(15);
+        RuleFor(p => p.GameName).NotEmpty();
+        RuleFor(p => p.PlayerName).NotEmpty();
+        RuleFor(p => p.CompanyName).NotEmpty();
+        RuleFor(p => p.Rounds).NotNull().GreaterThanOrEqualTo(15);
     }
 }
 
 public class CreateGame(
-  ICompaniesRepository companiesRepository,
   IGamesRepository gamesRepository,
-  IPlayersRepository playersRepository
+  IAction<CreatePlayerParams, Result<Player>> createPlayerAction
 ) : IAction<CreateGameParams, Result<Game>>
 {
     public async Task<Result<Game>> PerformAsync(CreateGameParams actionParams)
     {
-        var actionValidator = new CreateGameValidator(gamesRepository);
+        var actionValidator = new CreateGameValidator();
         var actionValidationResult = await actionValidator.ValidateAsync(actionParams);
 
         if (actionValidationResult.Errors.Count != 0)
@@ -52,13 +38,19 @@ public class CreateGame(
 
         var (gameName, playerName, companyName, rounds) = actionParams;
 
+        var isGameNameAvailable = await gamesRepository.IsGameNameAvailable(gameName);
+
+        if (!isGameNameAvailable)
+        {
+            return Result.Fail("'Game Name' is already in use.");
+        }
+
         var game = new Game(gameName, rounds);
 
         await gamesRepository.SaveGame(game);
 
-        var createPlayer = new CreatePlayer(companiesRepository, gamesRepository, playersRepository);
-        var createPlayerParams = new CreatePlayerParams(playerName, companyName, game.Id!.Value);
-        var createPlayerResult = await createPlayer.PerformAsync(createPlayerParams);
+        var createPlayerParams = new CreatePlayerParams(playerName, companyName, Game: game);
+        var createPlayerResult = await createPlayerAction.PerformAsync(createPlayerParams);
 
         if (createPlayerResult.IsFailed)
         {

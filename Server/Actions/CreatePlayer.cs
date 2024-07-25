@@ -8,45 +8,28 @@ using Server.Persistence.Contracts;
 
 namespace Server.Actions;
 
-public record CreatePlayerParams(string PlayerName, string CompanyName, int GameId);
+public record CreatePlayerParams(string PlayerName, string CompanyName, int? GameId = null, Game? Game = null);
 
 public class CreatePlayerValidator : AbstractValidator<CreatePlayerParams>
 {
-    public CreatePlayerValidator(
-      IGamesRepository gamesRepository,
-      IPlayersRepository playersRepository
-    )
+    public CreatePlayerValidator()
     {
-        RuleFor(actionParams => actionParams.PlayerName)
-          .NotNull()
-          .NotEmpty();
-
-        RuleFor(actionParams => actionParams.CompanyName)
-          .NotNull()
-          .NotEmpty();
-
-        RuleFor(actionParams => actionParams.GameId)
-          .NotNull()
-          .NotEmpty()
-          .MustAsync(async (gameId, _token) => await gamesRepository.GameExists(gameId))
-          .WithMessage(actionParams => $"Game with Id \"{actionParams.GameId}\" not found.");
-
-        RuleFor(actionParams => new { actionParams.PlayerName, actionParams.GameId })
-          .MustAsync(async (actionParams, _token) =>
-            await playersRepository.IsPlayerNameAvailable(actionParams.PlayerName, actionParams.GameId))
-          .WithMessage("'Player Name' is already in use.");
+        RuleFor(p => p.PlayerName).NotEmpty();
+        RuleFor(p => p.CompanyName).NotEmpty();
+        RuleFor(p => p.GameId).NotEmpty().When(p => p.Game is null);
+        RuleFor(p => p.Game).NotEmpty().When(p => p.GameId is null);
     }
 }
 
 public class CreatePlayer(
-  ICompaniesRepository companiesRepository,
   IGamesRepository gamesRepository,
-  IPlayersRepository playersRepository
+  IPlayersRepository playersRepository,
+  IAction<CreateCompanyParams, Result<Company>> createCompanyAction
 ) : IAction<CreatePlayerParams, Result<Player>>
 {
     public async Task<Result<Player>> PerformAsync(CreatePlayerParams actionParams)
     {
-        var actionValidator = new CreatePlayerValidator(gamesRepository, playersRepository);
+        var actionValidator = new CreatePlayerValidator();
         var actionValidationResult = await actionValidator.ValidateAsync(actionParams);
 
         if (actionValidationResult.Errors.Count != 0)
@@ -54,22 +37,33 @@ public class CreatePlayer(
             return Result.Fail(actionValidationResult.Errors.Select(e => e.ErrorMessage));
         }
 
-        var (playerName, companyName, gameId) = actionParams;
+        var (playerName, companyName, gameId, game) = actionParams;
 
-        var game = await gamesRepository.GetById(gameId);
+        game ??= await gamesRepository.GetById(gameId!.Value);
+
+        if (game is null)
+        {
+            return Result.Fail($"Game with Id \"{gameId}\" not found.");
+        }
 
         if (!game!.CanBeJoined())
         {
             return Result.Fail("Game is full and cannot be joined.");
         }
 
-        var player = new Player(playerName, gameId);
+        var isPlayerNameAvailable = await playersRepository.IsPlayerNameAvailable(playerName, game.Id!.Value);
+
+        if (!isPlayerNameAvailable)
+        {
+            return Result.Fail("'Player Name' is already in use.");
+        }
+
+        var player = new Player(playerName, gameId!.Value);
 
         await playersRepository.SavePlayer(player);
 
-        var createCompany = new CreateCompany(companiesRepository, gamesRepository, playersRepository);
-        var createCompanyParams = new CreateCompanyParams(companyName, player.Id!.Value);
-        var createCompanyResult = await createCompany.PerformAsync(createCompanyParams);
+        var createCompanyParams = new CreateCompanyParams(companyName, Player: player);
+        var createCompanyResult = await createCompanyAction.PerformAsync(createCompanyParams);
 
         if (createCompanyResult.IsFailed)
         {

@@ -8,51 +8,27 @@ using Server.Persistence.Contracts;
 
 namespace Server.Actions;
 
-public sealed record CreateCompanyParams(string CompanyName, int PlayerId);
+public sealed record CreateCompanyParams(string CompanyName, int? PlayerId = null, Player? Player = null);
 
 public class CreateCompanyValidator : AbstractValidator<CreateCompanyParams>
 {
-    public CreateCompanyValidator(
-      ICompaniesRepository companiesRepository,
-      IGamesRepository gamesRepository,
-      IPlayersRepository playersRepository
-    )
+    public CreateCompanyValidator()
     {
-        RuleFor(actionParams => actionParams.CompanyName)
-          .NotNull()
-          .NotEmpty();
-
-        RuleFor(actionParams => actionParams.PlayerId)
-          .NotNull()
-          .NotEmpty()
-          .MustAsync(async (playerId, _token) => await playersRepository.PlayerExists(playerId))
-          .WithMessage(actionParams => $"Player with Id \"{actionParams.PlayerId}\" not found.");
-
-        RuleFor(actionParams => new { actionParams.CompanyName, actionParams.PlayerId })
-          .MustAsync(async (actionParams, _token) =>
-          {
-              var game = await gamesRepository.GetByPlayerId(actionParams.PlayerId);
-
-              if (game is null)
-              {
-                  return false;
-              }
-
-              return await companiesRepository.IsCompanyNameAvailable(actionParams.CompanyName, game.Id!.Value);
-          })
-          .WithMessage("'Company Name' is already in use.");
+        RuleFor(p => p.CompanyName).NotEmpty();
+        RuleFor(p => p.PlayerId).NotEmpty().When(p => p.Player is null);
+        RuleFor(p => p.Player).NotEmpty().When(p => p.PlayerId is null);
     }
 }
 
 public class CreateCompany(
   ICompaniesRepository companiesRepository,
-  IGamesRepository gamesRepository,
-  IPlayersRepository playersRepository
+  IPlayersRepository playersRepository,
+  IAction<CreateEmployeeParams, Result<Employee>> createEmployeeAction
 ) : IAction<CreateCompanyParams, Result<Company>>
 {
     public async Task<Result<Company>> PerformAsync(CreateCompanyParams actionParams)
     {
-        var actionValidator = new CreateCompanyValidator(companiesRepository, gamesRepository, playersRepository);
+        var actionValidator = new CreateCompanyValidator();
         var actionValidationResult = await actionValidator.ValidateAsync(actionParams);
 
         if (actionValidationResult.Errors.Count != 0)
@@ -60,18 +36,41 @@ public class CreateCompany(
             return Result.Fail(actionValidationResult.Errors.Select(e => e.ErrorMessage));
         }
 
-        var (companyName, playerId) = actionParams;
+        var (companyName, playerId, player) = actionParams;
 
-        var player = await playersRepository.GetById(playerId);
+        player ??= await playersRepository.GetById(playerId!.Value);
+
+        if (player is null)
+        {
+            Result.Fail($"Player with Id \"{playerId}\" not found.");
+        }
 
         if (player!.CompanyId is not null)
         {
             return Result.Fail("Player already has a company.");
         }
 
-        var company = new Company(companyName, playerId);
+        var isCompanyNameAvailable = await companiesRepository.IsCompanyNameAvailable(companyName, player.GameId);
+
+        if (!isCompanyNameAvailable)
+        {
+            Result.Fail("'Company Name' is already in use.");
+        }
+
+        var company = new Company(companyName, player.Id!.Value);
 
         await companiesRepository.SaveCompany(company);
+
+        foreach (var index in Enumerable.Range(1, 3))
+        {
+            var createEmployeeParams = new CreateEmployeeParams("John Smith", Company: company);
+            var createEmployeeResult = await createEmployeeAction.PerformAsync(createEmployeeParams);
+
+            if (createEmployeeResult.IsFailed)
+            {
+                return Result.Fail(createEmployeeResult.Errors);
+            }
+        }
 
         return Result.Ok(company);
     }

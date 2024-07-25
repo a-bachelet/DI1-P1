@@ -9,4 +9,6 @@ public class Company(string name, int playerId)
     public int PlayerId { get; set; } = playerId;
 
     public Player Player { get; set; } = null!;
+
+    public ICollection<Employee> Employees { get; } = [];
 }
