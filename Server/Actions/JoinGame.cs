@@ -1,3 +1,4 @@
+
 using FluentResults;
 
 using Server.Actions.Contracts;
@@ -15,8 +16,10 @@ public sealed record JoinGameParams(
 
 public class JoinGameValidator : CreatePlayerValidator;
 
-public class JoinGame(
-    IGamesRepository gamesRepository,
-    IPlayersRepository playersRepository,
-    IAction<CreateCompanyParams, Result<Company>> createCompanyAction
-) : CreatePlayer(gamesRepository, playersRepository, createCompanyAction);
+public class JoinGame(IAction<CreatePlayerParams, Result<Player>> createPlayerAction) : IAction<JoinGameParams, Result<Player>>
+{
+    public async Task<Result<Player>> PerformAsync(JoinGameParams actionParams)
+    {
+        return await createPlayerAction.PerformAsync(actionParams);
+    }
+}

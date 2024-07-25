@@ -1,3 +1,8 @@
+using FluentResults;
+
+using Server.Actions;
+using Server.Actions.Contracts;
+using Server.Models;
 using Server.Persistence;
 using Server.Persistence.Contracts;
 
@@ -9,6 +14,13 @@ builder.Services.AddDbContext<WssDbContext>();
 
 builder.Services.AddTransient<IGamesRepository, GamesRepository>();
 builder.Services.AddTransient<IPlayersRepository, PlayersRepository>();
+
+builder.Services.AddTransient<IAction<CreateCompanyParams, Result<Company>>, CreateCompany>();
+builder.Services.AddTransient<IAction<CreateEmployeeParams, Result<Employee>>, CreateEmployee>();
+builder.Services.AddTransient<IAction<CreateGameParams, Result<Game>>, CreateGame>();
+builder.Services.AddTransient<IAction<CreatePlayerParams, Result<Player>>, CreatePlayer>();
+builder.Services.AddTransient<IAction<JoinGameParams, Result<Player>>, JoinGame>();
+builder.Services.AddTransient<IAction<StartGameParams, Result<Game>>, StartGame>();
 
 var app = builder.Build();
 
