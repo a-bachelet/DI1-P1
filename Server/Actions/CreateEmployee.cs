@@ -48,9 +48,9 @@ public class CreateEmployee(
             Result.Fail($"Company with Id \"{companyId}\" not found.");
         }
 
-        IEnumerable<int> salaries = Array.Empty<int>();
+        IEnumerable<int> salaries = [];
 
-        for (var salary = 29000; salary <= 100000; salary++)
+        for (var salary = 29000; salary <= 100000; salary += 500)
         {
             salaries = salaries.Append(salary);
         }

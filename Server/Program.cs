@@ -15,6 +15,7 @@ builder.Services.AddDbContext<WssDbContext>();
 builder.Services.AddEndpoints(typeof(Program).Assembly);
 
 builder.Services.AddTransient<ICompaniesRepository, CompaniesRepository>();
+builder.Services.AddTransient<IConsultantsRepository, ConsultantsRepository>();
 builder.Services.AddTransient<IEmployeesRepository, EmployeesRepository>();
 builder.Services.AddTransient<IGamesRepository, GamesRepository>();
 builder.Services.AddTransient<IPlayersRepository, PlayersRepository>();
