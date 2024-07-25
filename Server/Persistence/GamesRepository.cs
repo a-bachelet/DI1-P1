@@ -19,7 +19,9 @@ public class GamesRepository(WssDbContext context) : IGamesRepository
 
     public async Task<Game?> GetById(int gameId)
     {
-        return await context.Games.FindAsync(gameId);
+        return await context.Games
+            .Include(g => g.Players)
+            .FirstOrDefaultAsync(g => g.Id == gameId);
     }
 
     public async Task<Game?> GetByPlayerId(int playerId)

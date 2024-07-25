@@ -54,7 +54,7 @@ public class CreateCompany(
 
         if (!isCompanyNameAvailable)
         {
-            Result.Fail("'Company Name' is already in use.");
+            return Result.Fail("'Company Name' is already in use.");
         }
 
         var company = new Company(companyName, player.Id!.Value);

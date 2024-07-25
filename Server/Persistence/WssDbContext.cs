@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-using Npgsql.NameTranslation;
-
 using Server.Models;
 
 namespace Server.Persistence;
@@ -31,8 +29,6 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresEnum("public", "game_status", ["Waiting", "InProgress", "Finished"]);
-
         modelBuilder.Entity<Company>(e =>
         {
             e.ToTable("companies");
@@ -43,8 +39,8 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
                 .HasForeignKey<Company>(e => e.PlayerId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
-            e.OwnsMany(e => e.Employees)
-                .WithOwner(e => e.Company)
+            e.HasMany(e => e.Employees)
+                .WithOne(e => e.Company)
                 .HasForeignKey(e => e.CompanyId);
         });
 
@@ -67,10 +63,12 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
             e.Property(e => e.Name).HasColumnType("varchar(255)");
             e.Property(e => e.Rounds).HasColumnType("integer");
             e.Property(e => e.Status)
-                .HasColumnType("game_status")
+                .HasColumnType("varchar(255)")
                 .HasDefaultValue(GameStatus.Waiting)
                 .HasConversion(new EnumToStringConverter<GameStatus>());
-            e.OwnsMany(e => e.Players).WithOwner(e => e.Game).HasForeignKey(e => e.GameId);
+            e.HasMany(e => e.Players)
+                .WithOne(e => e.Game)
+                .HasForeignKey(e => e.GameId);
         });
 
         modelBuilder.Entity<Player>(e =>
@@ -83,9 +81,9 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
                 .HasForeignKey(e => e.GameId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
-            e.OwnsOne(e => e.Company)
-                .WithOwner(e => e.Player)
-                .HasForeignKey(e => e.PlayerId);
+            e.HasOne(e => e.Company)
+                .WithOne(e => e.Player)
+                .HasForeignKey<Company>(e => e.PlayerId);
         });
     }
 }

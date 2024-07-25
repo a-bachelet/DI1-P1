@@ -2,6 +2,7 @@ using FluentResults;
 
 using Server.Actions;
 using Server.Actions.Contracts;
+using Server.Endpoints.Extensions;
 using Server.Models;
 using Server.Persistence;
 using Server.Persistence.Contracts;
@@ -11,7 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<WssDbContext>();
+builder.Services.AddEndpoints(typeof(Program).Assembly);
 
+builder.Services.AddTransient<ICompaniesRepository, CompaniesRepository>();
+builder.Services.AddTransient<IEmployeesRepository, EmployeesRepository>();
 builder.Services.AddTransient<IGamesRepository, GamesRepository>();
 builder.Services.AddTransient<IPlayersRepository, PlayersRepository>();
 
@@ -29,6 +33,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapEndpoints();
 
 app.UseHttpsRedirection();
 

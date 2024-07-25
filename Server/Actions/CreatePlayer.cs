@@ -58,7 +58,7 @@ public class CreatePlayer(
             return Result.Fail("'Player Name' is already in use.");
         }
 
-        var player = new Player(playerName, gameId!.Value);
+        var player = new Player(playerName, game.Id!.Value);
 
         await playersRepository.SavePlayer(player);
 
