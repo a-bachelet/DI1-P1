@@ -15,6 +15,7 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
     public DbSet<Employee> Employees { get; set; } = null!;
     public DbSet<Game> Games { get; set; } = null!;
     public DbSet<Player> Players { get; set; } = null!;
+    public DbSet<Round> Rounds { get; set; } = null!;
     public DbSet<Skill> Skills { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -98,6 +99,14 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
             e.HasOne(e => e.Company)
                 .WithOne(e => e.Player)
                 .HasForeignKey<Company>(e => e.PlayerId);
+        });
+
+        modelBuilder.Entity<Round>(e =>
+        {
+            e.ToTable("rounds");
+            e.HasKey(e => e.Id);
+            e.Property(e => e.Order).HasColumnType("integer");
+            e.OwnsMany(e => e.Actions, builder => builder.ToJson());
         });
 
         modelBuilder.Entity<Skill>(e =>
