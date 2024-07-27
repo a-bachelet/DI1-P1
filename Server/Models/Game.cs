@@ -19,13 +19,22 @@ public class Game(string name, int rounds = 15)
 
     public ICollection<Player> Players { get; } = [];
 
+    public ICollection<Round> RoundsCollection { get; } = [];
+
     public bool CanBeJoined()
     {
-        return Players.Count < 3;
+        return Status == GameStatus.Waiting && Players.Count < 3;
     }
 
     public bool CanBeStarted()
     {
         return Status == GameStatus.Waiting;
+    }
+
+    public bool CanStartANewRound()
+    {
+        return
+            Status == GameStatus.InProgress &&
+            RoundsCollection.Count < Rounds;
     }
 }

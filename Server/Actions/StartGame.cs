@@ -19,7 +19,10 @@ public class StartGameValidator : AbstractValidator<StartGameParams>
     }
 }
 
-public class StartGame(IGamesRepository gamesRepository) : IAction<StartGameParams, Result<Game>>
+public class StartGame(
+    IGamesRepository gamesRepository,
+    IAction<StartRoundParams, Result<Round>> startRoundAction
+) : IAction<StartGameParams, Result<Game>>
 {
     public async Task<Result<Game>> PerformAsync(StartGameParams actionParams)
     {
@@ -48,6 +51,14 @@ public class StartGame(IGamesRepository gamesRepository) : IAction<StartGamePara
         game.Status = GameStatus.InProgress;
 
         await gamesRepository.SaveGame(game);
+
+        var startRoundParams = new StartRoundParams(Game: game);
+        var startRoundResult = await startRoundAction.PerformAsync(startRoundParams);
+
+        if (startRoundResult.IsFailed)
+        {
+            return Result.Fail(startRoundResult.Errors);
+        }
 
         return Result.Ok(game);
     }

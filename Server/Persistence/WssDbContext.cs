@@ -84,6 +84,9 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
             e.HasMany(e => e.Players)
                 .WithOne(e => e.Game)
                 .HasForeignKey(e => e.GameId);
+            e.HasMany(e => e.RoundsCollection)
+                .WithOne(e => e.Game)
+                .HasForeignKey(e => e.GameId);
         });
 
         modelBuilder.Entity<Player>(e =>
@@ -106,6 +109,9 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
             e.ToTable("rounds");
             e.HasKey(e => e.Id);
             e.Property(e => e.Order).HasColumnType("integer");
+            e.HasOne(e => e.Game)
+                .WithMany(e => e.RoundsCollection)
+                .HasForeignKey(e => e.GameId);
             e.OwnsMany(e => e.Actions, builder => builder.ToJson());
         });
 
