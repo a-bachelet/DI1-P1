@@ -1,4 +1,4 @@
-﻿using Server.Models;
+using Server.Models;
 
 namespace Server.Persistence.Contracts;
 

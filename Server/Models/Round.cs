@@ -1,8 +1,8 @@
-﻿namespace Server.Models;
+namespace Server.Models;
 
 public class Round(int gameId, int order)
 {
-    public int? Id { get; private set;}
+    public int? Id { get; private set; }
 
     public int GameId { get; init; } = gameId;
 

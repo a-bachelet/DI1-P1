@@ -1,4 +1,4 @@
-﻿
+
 using System.Text.Json.Nodes;
 
 using FluentResults;
@@ -77,7 +77,8 @@ public class ActInRound(
 
         await roundsRepository.SaveRound(round);
 
-        if (round.EverybodyPlayed()) {
+        if (round.EverybodyPlayed())
+        {
             var finishRoundParams = new FinishRoundParams(Round: round);
             var finishRoundResult = await finishRoundAction.PerformAsync(finishRoundParams);
 

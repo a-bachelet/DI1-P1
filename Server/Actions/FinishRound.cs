@@ -1,4 +1,4 @@
-﻿
+
 
 using FluentResults;
 
@@ -65,7 +65,9 @@ public class FinishRound(
             var newRound = startRoundActionResult.Value;
 
             return Result.Ok(newRound);
-        } else {
+        }
+        else
+        {
             var finishGameActionParams = new FinishGameParams(Game: round.Game);
             var finishGameActionResult = await finishGameAction.PerformAsync(finishGameActionParams);
 

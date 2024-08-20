@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
@@ -38,14 +38,15 @@ public class RoundAction(int playerId)
         return action;
     }
 
-    protected virtual void ApplyPayload(JsonObject payload) {}
+    protected virtual void ApplyPayload(JsonObject payload) { }
 
     public int PlayerId { get; init; } = playerId;
 }
 
 public class SendEmployeeForTrainingRoundAction(int playerId) : RoundAction(playerId)
 {
-    public class SendEmployeeForTrainingPayload {
+    public class SendEmployeeForTrainingPayload
+    {
         public int EmployeeId { get; init; }
     }
 
@@ -59,7 +60,8 @@ public class SendEmployeeForTrainingRoundAction(int playerId) : RoundAction(play
 
 public class ParticipateInCallForTendersRoundAction(int playerId) : RoundAction(playerId)
 {
-    public class ParticipateInCallForTendersPayload {
+    public class ParticipateInCallForTendersPayload
+    {
         public int CallForTendersId { get; init; }
     }
 
@@ -73,7 +75,8 @@ public class ParticipateInCallForTendersRoundAction(int playerId) : RoundAction(
 
 public class RecruitAConsultantRoundAction(int playerId) : RoundAction(playerId)
 {
-    public class RecruitAConsultantPayload {
+    public class RecruitAConsultantPayload
+    {
         public int ConsultantId { get; init; }
     }
 
@@ -87,7 +90,8 @@ public class RecruitAConsultantRoundAction(int playerId) : RoundAction(playerId)
 
 public class FireAnEmployeeRoundAction(int playerId) : RoundAction(playerId)
 {
-    public class FireAnEmployeePayload {
+    public class FireAnEmployeePayload
+    {
         public int EmployeeId { get; init; }
     }
 
