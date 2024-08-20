@@ -3,6 +3,7 @@ using FluentResults;
 using Server.Actions;
 using Server.Actions.Contracts;
 using Server.Endpoints.Extensions;
+using Server.Hubs;
 using Server.Models;
 using Server.Persistence;
 using Server.Persistence.Contracts;
@@ -13,6 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<WssDbContext>();
 builder.Services.AddEndpoints(typeof(Program).Assembly);
+builder.Services.AddSignalR();
 
 builder.Services.AddTransient<ICompaniesRepository, CompaniesRepository>();
 builder.Services.AddTransient<IConsultantsRepository, ConsultantsRepository>();
@@ -43,6 +45,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapEndpoints();
+
+app.MapHub<GameHub>("/game");
 
 app.UseHttpsRedirection();
 

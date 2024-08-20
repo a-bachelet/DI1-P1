@@ -3,7 +3,10 @@ using FluentResults;
 
 using FluentValidation;
 
+using Microsoft.AspNetCore.SignalR;
+
 using Server.Actions.Contracts;
+using Server.Hubs;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -20,7 +23,8 @@ public class CreateConsultantValidator : AbstractValidator<CreateConsultantParam
 }
 
 public class CreateConsultant(
-    IConsultantsRepository consultantsRepository
+    IConsultantsRepository consultantsRepository,
+    IHubContext<GameHub> hubContext
 ) : IAction<CreateConsultantParams, Result<Consultant>>
 {
     public async Task<Result<Consultant>> PerformAsync(CreateConsultantParams actionParams)
@@ -47,6 +51,8 @@ public class CreateConsultant(
         var consultant = new Consultant(actionParams.ConsultantName, randomSalaryRequirement);
 
         await consultantsRepository.SaveConsultant(consultant);
+
+        await hubContext.Clients.Group("@TODO LINK CONSULTANT TO GAME").SendAsync("ConsultantCreated", consultant.Name);
 
         return Result.Ok(consultant);
     }

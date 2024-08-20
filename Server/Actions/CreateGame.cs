@@ -2,7 +2,10 @@ using FluentResults;
 
 using FluentValidation;
 
+using Microsoft.AspNetCore.SignalR;
+
 using Server.Actions.Contracts;
+using Server.Hubs;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -23,7 +26,8 @@ public class CreateGameValidator : AbstractValidator<CreateGameParams>
 
 public class CreateGame(
   IGamesRepository gamesRepository,
-  IAction<CreatePlayerParams, Result<Player>> createPlayerAction
+  IAction<CreatePlayerParams, Result<Player>> createPlayerAction,
+  IHubContext<GameHub> hubContext
 ) : IAction<CreateGameParams, Result<Game>>
 {
     public async Task<Result<Game>> PerformAsync(CreateGameParams actionParams)
@@ -56,6 +60,8 @@ public class CreateGame(
         {
             return Result.Fail(createPlayerResult.Errors);
         }
+
+        await hubContext.Clients.Group(game.Name).SendAsync("GameCreated");
 
         return Result.Ok(game);
     }

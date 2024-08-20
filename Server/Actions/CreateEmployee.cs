@@ -3,7 +3,10 @@ using FluentResults;
 
 using FluentValidation;
 
+using Microsoft.AspNetCore.SignalR;
+
 using Server.Actions.Contracts;
+using Server.Hubs;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -24,7 +27,8 @@ public class CreateEmployeeValidator : AbstractValidator<CreateEmployeeParams>
 public class CreateEmployee(
     ICompaniesRepository companiesRepository,
     IEmployeesRepository employeesRepository,
-    ISkillsRepository skillsRepository
+    ISkillsRepository skillsRepository,
+    IHubContext<GameHub> hubContext
 ) : IAction<CreateEmployeeParams, Result<Employee>>
 {
     public async Task<Result<Employee>> PerformAsync(CreateEmployeeParams actionParams)
@@ -67,6 +71,8 @@ public class CreateEmployee(
         }
 
         await employeesRepository.SaveEmployee(employee);
+
+        await hubContext.Clients.Group(employee.Company.Player.Game.Name).SendAsync("EmployeeCreated", employee.Name);
 
         return Result.Ok(employee);
     }

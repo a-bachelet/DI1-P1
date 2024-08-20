@@ -1,9 +1,11 @@
 
 using FluentResults;
 
+using Microsoft.AspNetCore.SignalR;
+
 using Server.Actions.Contracts;
+using Server.Hubs;
 using Server.Models;
-using Server.Persistence.Contracts;
 
 namespace Server.Actions;
 
@@ -16,10 +18,22 @@ public sealed record JoinGameParams(
 
 public class JoinGameValidator : CreatePlayerValidator;
 
-public class JoinGame(IAction<CreatePlayerParams, Result<Player>> createPlayerAction) : IAction<JoinGameParams, Result<Player>>
+public class JoinGame(
+    IAction<CreatePlayerParams,
+    Result<Player>> createPlayerAction,
+    IHubContext<GameHub> hubContext
+) : IAction<JoinGameParams, Result<Player>>
 {
     public async Task<Result<Player>> PerformAsync(JoinGameParams actionParams)
     {
-        return await createPlayerAction.PerformAsync(actionParams);
+        var createPlayerActionResult = await createPlayerAction.PerformAsync(actionParams);
+
+        if (createPlayerActionResult.IsSuccess)
+        {
+            var player = createPlayerActionResult.Value;
+            await hubContext.Clients.Group(player.Game.Name).SendAsync("GameJoined", player.Name);
+        }
+
+        return createPlayerActionResult;
     }
 }

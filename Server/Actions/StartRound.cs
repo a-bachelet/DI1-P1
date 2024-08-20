@@ -4,7 +4,10 @@ using FluentResults;
 
 using FluentValidation;
 
+using Microsoft.AspNetCore.SignalR;
+
 using Server.Actions.Contracts;
+using Server.Hubs;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -23,7 +26,8 @@ public class StartRoundValidator : AbstractValidator<StartRoundParams>
 
 public class StartRound(
     IGamesRepository gamesRepository,
-    IRoundsRepository roundsRepository
+    IRoundsRepository roundsRepository,
+    IHubContext<GameHub> hubContext
 ) : IAction<StartRoundParams, Result<Round>>
 {
     public async Task<Result<Round>> PerformAsync(StartRoundParams actionParams)
@@ -53,6 +57,8 @@ public class StartRound(
         var round = new Round(game.Id!.Value, game.RoundsCollection.Count + 1);
 
         await roundsRepository.SaveRound(round);
+
+        await hubContext.Clients.Group(game.Name).SendAsync("RoundStarted", round.Id);
 
         return Result.Ok(round);
     }

@@ -6,8 +6,10 @@ using FluentResults;
 using FluentValidation;
 
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.SignalR;
 
 using Server.Actions.Contracts;
+using Server.Hubs;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -30,7 +32,8 @@ public class ApplyRoundActionValidator : AbstractValidator<ApplyRoundActionParam
 }
 
 public class ApplyRoundAction(
-    IGamesRepository gamesRepository
+    IGamesRepository gamesRepository,
+    IHubContext<GameHub> hubContext
 ) : IAction<ApplyRoundActionParams, Result>
 {
     public async Task<Result> PerformAsync(ApplyRoundActionParams actionParams)
@@ -49,8 +52,10 @@ public class ApplyRoundAction(
 
         if (game is null)
         {
-            Result.Fail($"Game with Id \"{gameId}\" not found.");
+            return Result.Fail($"Game with Id \"{gameId}\" not found.");
         }
+
+        await hubContext.Clients.Group(game!.Name).SendAsync("RoundActionApplied", actionParams.RoundAction);
 
         return Result.Ok();
     }
