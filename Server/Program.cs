@@ -22,10 +22,13 @@ builder.Services.AddTransient<IPlayersRepository, PlayersRepository>();
 builder.Services.AddTransient<IRoundsRepository, RoundsRepository>();
 builder.Services.AddTransient<ISkillsRepository, SkillsRepository>();
 
+builder.Services.AddTransient<IAction<ActInRoundParams, Result<Round>>, ActInRound>();
+builder.Services.AddTransient<IAction<ApplyRoundActionParams, Result>, ApplyRoundAction>();
 builder.Services.AddTransient<IAction<CreateCompanyParams, Result<Company>>, CreateCompany>();
 builder.Services.AddTransient<IAction<CreateEmployeeParams, Result<Employee>>, CreateEmployee>();
 builder.Services.AddTransient<IAction<CreateGameParams, Result<Game>>, CreateGame>();
 builder.Services.AddTransient<IAction<CreatePlayerParams, Result<Player>>, CreatePlayer>();
+builder.Services.AddTransient<IAction<FinishGameParams, Result<Game>>, FinishGame>();
 builder.Services.AddTransient<IAction<FinishRoundParams, Result<Round>>, FinishRound>();
 builder.Services.AddTransient<IAction<JoinGameParams, Result<Player>>, JoinGame>();
 builder.Services.AddTransient<IAction<StartGameParams, Result<Game>>, StartGame>();

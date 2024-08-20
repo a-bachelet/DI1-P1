@@ -22,7 +22,10 @@ public class FinishRoundValidator : AbstractValidator<FinishRoundParams>
 }
 
 public class FinishRound(
-    IRoundsRepository roundsRepository
+    IRoundsRepository roundsRepository,
+    IAction<ApplyRoundActionParams, Result> applyRoundActionAction,
+    IAction<StartRoundParams, Result<Round>> startRoundAction,
+    IAction<FinishGameParams, Result<Game>> finishGameAction
 ) : IAction<FinishRoundParams, Result<Round>>
 {
     public async Task<Result<Round>> PerformAsync(FinishRoundParams actionParams)
@@ -44,6 +47,34 @@ public class FinishRound(
             return Result.Fail($"Round with Id \"{roundId}\" not found.");
         }
 
-        return Result.Ok(round);
+        foreach (var action in round.Actions)
+        {
+            var applyRoundActionParams = new ApplyRoundActionParams(RoundAction: action, Game: round.Game);
+            var applyRoundActionResult = await applyRoundActionAction.PerformAsync(applyRoundActionParams);
+
+            if (applyRoundActionResult.IsFailed)
+            {
+                return Result.Fail(applyRoundActionResult.Errors);
+            }
+        }
+
+        if (round.Game.CanStartANewRound())
+        {
+            var startRoundActionParams = new StartRoundParams(Game: round.Game);
+            var startRoundActionResult = await startRoundAction.PerformAsync(startRoundActionParams);
+            var newRound = startRoundActionResult.Value;
+
+            return Result.Ok(newRound);
+        } else {
+            var finishGameActionParams = new FinishGameParams(Game: round.Game);
+            var finishGameActionResult = await finishGameAction.PerformAsync(finishGameActionParams);
+
+            if (finishGameActionResult.IsFailed)
+            {
+                return Result.Fail(finishGameActionResult.Errors);
+            }
+
+            return Result.Ok(round);
+        }
     }
 }
