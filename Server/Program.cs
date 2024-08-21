@@ -4,6 +4,7 @@ using Server.Actions;
 using Server.Actions.Contracts;
 using Server.Endpoints.Extensions;
 using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence;
 using Server.Persistence.Contracts;
@@ -36,6 +37,9 @@ builder.Services.AddTransient<IAction<JoinGameParams, Result<Player>>, JoinGame>
 builder.Services.AddTransient<IAction<StartGameParams, Result<Game>>, StartGame>();
 builder.Services.AddTransient<IAction<StartRoundParams, Result<Round>>, StartRound>();
 
+builder.Services.AddTransient<IGameHubService, GameHubService>();
+builder.Services.AddTransient<IMainHubService, MainHubService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -46,7 +50,8 @@ if (app.Environment.IsDevelopment())
 
 app.MapEndpoints();
 
-app.MapHub<GameHub>("/game");
+app.MapHub<MainHub>("/main");
+app.MapHub<GameHub>("/games/{gameId}");
 
 app.UseHttpsRedirection();
 

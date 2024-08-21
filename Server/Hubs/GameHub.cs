@@ -1,31 +1,47 @@
-using System.Text.Json;
-
 using Microsoft.AspNetCore.SignalR;
 
+using Server.Hubs.Contracts;
+using Server.Hubs.Records;
+using Server.Models;
 using Server.Persistence.Contracts;
 
 namespace Server.Hubs;
 
-public class GameHub(IGamesRepository gamesRepository) : Hub()
+public class GameHub(IGameHubService gameHubService, IGamesRepository gamesRepository) : Hub<IGameHubClient>()
 {
     public override async Task OnConnectedAsync()
     {
-        await Clients.All.SendAsync("ReceiveMessage", "HELLO WORLD !");
+        var gameId = Context.GetHttpContext()?.GetRouteData().Values["gameId"];
+
+        if (gameId is null) { Context.Abort(); return; }
+
+        var game = await gamesRepository.GetById(int.Parse((string) gameId));
+
+        if (game is null) { Context.Abort(); return; }
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"{game.Id}__{game.Name}");
+
+        await gameHubService.UpdateCurrentGame(Clients.Caller, game: game);
+
         await base.OnConnectedAsync();
     }
+}
 
-    public async Task WatchGame(int gameId)
+public class GameHubService(IHubContext<GameHub, IGameHubClient> gameHubContext, IGamesRepository gamesRepository) : IGameHubService
+{
+    public async Task UpdateCurrentGame(IGameHubClient? caller = null, int? gameId = null, Game? game = null)
     {
-        var game = await gamesRepository.GetById(gameId);
+        if (game is null && gameId is null) { return; }
 
-        if (game is null)
-        {
-            await Clients.Caller.SendAsync("Error", "WatchGame", $"Game with Id \"{gameId}\" not found.");
-        }
-        else
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, game.Name);
-            await Clients.Caller.SendAsync("Game", JsonSerializer.Serialize(new { game.Name }));
-        }
+        game ??= await gamesRepository.GetById((int) gameId!);
+
+        var data = new GameOverview(
+            (int) game!.Id!, game.Name,
+            game.Players.Select(p => new PlayerOverview((int) p.Id!, p.Name)).ToList()
+        );
+
+        caller ??= gameHubContext.Clients.Group($"{game.Id}__{game.Name}");
+
+        await caller.CurrentGameUpdated(data);
     }
 }

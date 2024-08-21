@@ -7,6 +7,11 @@ namespace Server.Persistence;
 
 public class GamesRepository(WssDbContext context) : IGamesRepository
 {
+    public async Task<ICollection<Game>> GetJoinable()
+    {
+        return await context.Games.Where(g => g.Status == GameStatus.Waiting).ToListAsync();
+    }
+
     public async Task<bool> GameExists(int gameId)
     {
         return await context.Games.AnyAsync(game => game.Id == gameId);

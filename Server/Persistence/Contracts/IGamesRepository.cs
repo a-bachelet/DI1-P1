@@ -4,6 +4,7 @@ namespace Server.Persistence.Contracts;
 
 public interface IGamesRepository
 {
+    Task<ICollection<Game>> GetJoinable();
     Task<bool> IsGameNameAvailable(string gameName);
     Task<bool> GameExists(int gameId);
     Task<Game?> GetById(int gameId);

@@ -2,10 +2,8 @@ using FluentResults;
 
 using FluentValidation;
 
-using Microsoft.AspNetCore.SignalR;
-
 using Server.Actions.Contracts;
-using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -28,7 +26,7 @@ public class CreatePlayer(
   IGamesRepository gamesRepository,
   IPlayersRepository playersRepository,
   IAction<CreateCompanyParams, Result<Company>> createCompanyAction,
-  IHubContext<GameHub> hubContext
+  IGameHubService gameHubService
 ) : IAction<CreatePlayerParams, Result<Player>>
 {
     public async Task<Result<Player>> PerformAsync(CreatePlayerParams actionParams)
@@ -74,7 +72,7 @@ public class CreatePlayer(
             return Result.Fail(createCompanyResult.Errors);
         }
 
-        await hubContext.Clients.Group(player.Game.Name).SendAsync("PlayerCreated", player.Name);
+        await gameHubService.UpdateCurrentGame(game: player.Game);
 
         return Result.Ok(player);
     }

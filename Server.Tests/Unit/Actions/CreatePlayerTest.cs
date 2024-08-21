@@ -6,6 +6,8 @@ using Moq;
 
 using Server.Actions;
 using Server.Actions.Contracts;
+using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -16,12 +18,14 @@ public class CreatePlayerTest
     private readonly Mock<IGamesRepository> _gamesRepositoryMock;
     private readonly Mock<IPlayersRepository> _playersRepositoryMock;
     private readonly Mock<IAction<CreateCompanyParams, Result<Company>>> _createCompanyMock;
+    private readonly Mock<IGameHubService> _gameHubServiceMock;
 
     public CreatePlayerTest()
     {
         _gamesRepositoryMock = new Mock<IGamesRepository>();
         _playersRepositoryMock = new Mock<IPlayersRepository>();
         _createCompanyMock = new Mock<IAction<CreateCompanyParams, Result<Company>>>();
+        _gameHubServiceMock = new Mock<IGameHubService>();
 
         _gamesRepositoryMock
             .Setup(r => r.GetById(It.IsAny<int>()))
@@ -43,6 +47,10 @@ public class CreatePlayerTest
         _createCompanyMock
             .Setup(a => a.PerformAsync(It.IsAny<CreateCompanyParams>()))
             .Returns(Task.Run(() => Result.Ok(It.IsAny<Company>())));
+
+        _gameHubServiceMock
+            .Setup(s => s.UpdateCurrentGame(It.IsAny<IGameHubClient?>(), It.IsAny<int?>(), It.IsAny<Game?>()))
+            .Returns(Task.CompletedTask);
     }
 
     [Fact]
@@ -52,7 +60,8 @@ public class CreatePlayerTest
         var action = new CreatePlayer(
           _gamesRepositoryMock.Object,
           _playersRepositoryMock.Object,
-          _createCompanyMock.Object
+          _createCompanyMock.Object,
+          _gameHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -73,7 +82,8 @@ public class CreatePlayerTest
         var action = new CreatePlayer(
           _gamesRepositoryMock.Object,
           _playersRepositoryMock.Object,
-          _createCompanyMock.Object
+          _createCompanyMock.Object,
+          _gameHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -94,7 +104,8 @@ public class CreatePlayerTest
         var action = new CreatePlayer(
           _gamesRepositoryMock.Object,
           _playersRepositoryMock.Object,
-          _createCompanyMock.Object
+          _createCompanyMock.Object,
+          _gameHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -115,7 +126,8 @@ public class CreatePlayerTest
         var action = new CreatePlayer(
           _gamesRepositoryMock.Object,
           _playersRepositoryMock.Object,
-          _createCompanyMock.Object
+          _createCompanyMock.Object,
+          _gameHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -132,7 +144,8 @@ public class CreatePlayerTest
         var action = new CreatePlayer(
           _gamesRepositoryMock.Object,
           _playersRepositoryMock.Object,
-          _createCompanyMock.Object
+          _createCompanyMock.Object,
+          _gameHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);

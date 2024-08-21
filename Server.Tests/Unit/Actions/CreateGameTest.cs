@@ -6,6 +6,9 @@ using Moq;
 
 using Server.Actions;
 using Server.Actions.Contracts;
+using Server.Hubs;
+using Server.Hubs.Contracts;
+using Server.Hubs.Records;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -15,11 +18,13 @@ public class CreateGameTest
 {
     private readonly Mock<IGamesRepository> _gamesRepositoryMock;
     private readonly Mock<IAction<CreatePlayerParams, Result<Player>>> _createPlayerMock;
+    private readonly Mock<IMainHubService> _mainHubServiceMock;
 
     public CreateGameTest()
     {
         _gamesRepositoryMock = new Mock<IGamesRepository>();
         _createPlayerMock = new Mock<IAction<CreatePlayerParams, Result<Player>>>();
+        _mainHubServiceMock = new Mock<IMainHubService>();
 
         _gamesRepositoryMock
             .Setup(r => r.IsGameNameAvailable(It.IsAny<string>()))
@@ -32,6 +37,10 @@ public class CreateGameTest
         _createPlayerMock
             .Setup(a => a.PerformAsync(It.IsAny<CreatePlayerParams>()))
             .Returns(Task.Run(() => Result.Ok(It.IsAny<Player>())));
+
+        _mainHubServiceMock
+            .Setup(s => s.UpdateJoinableGamesList(It.IsAny<IMainHubClient>()))
+            .Returns(Task.CompletedTask);
     }
 
     [Fact]
@@ -40,7 +49,8 @@ public class CreateGameTest
         var actionParams = new CreateGameParams("", "Player 1", "Company 1");
         var action = new CreateGame(
             _gamesRepositoryMock.Object,
-            _createPlayerMock.Object
+            _createPlayerMock.Object,
+            _mainHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -56,7 +66,8 @@ public class CreateGameTest
         var actionParams = new CreateGameParams("Game 1", "", "Company 1");
         var action = new CreateGame(
             _gamesRepositoryMock.Object,
-            _createPlayerMock.Object
+            _createPlayerMock.Object,
+            _mainHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -72,7 +83,8 @@ public class CreateGameTest
         var actionParams = new CreateGameParams("Game 1", "Player 1", "Company 1", 14);
         var action = new CreateGame(
             _gamesRepositoryMock.Object,
-            _createPlayerMock.Object
+            _createPlayerMock.Object,
+            _mainHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -92,7 +104,8 @@ public class CreateGameTest
         var actionParams = new CreateGameParams("Game 1", "Player 1", "Company 1");
         var action = new CreateGame(
             _gamesRepositoryMock.Object,
-            _createPlayerMock.Object
+            _createPlayerMock.Object,
+            _mainHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -112,7 +125,8 @@ public class CreateGameTest
         var actionParams = new CreateGameParams("Game 1", "Player 1", "Company 1");
         var action = new CreateGame(
             _gamesRepositoryMock.Object,
-            _createPlayerMock.Object
+            _createPlayerMock.Object,
+            _mainHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
@@ -128,7 +142,8 @@ public class CreateGameTest
         var actionParams = new CreateGameParams("Game 1", "Player 1", "Company 1");
         var action = new CreateGame(
             _gamesRepositoryMock.Object,
-            _createPlayerMock.Object
+            _createPlayerMock.Object,
+            _mainHubServiceMock.Object
         );
 
         var actionResult = await action.PerformAsync(actionParams);
