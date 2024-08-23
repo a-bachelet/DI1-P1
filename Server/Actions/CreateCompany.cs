@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 
 using Server.Actions.Contracts;
 using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -27,7 +28,7 @@ public class CreateCompany(
   ICompaniesRepository companiesRepository,
   IPlayersRepository playersRepository,
   IAction<CreateEmployeeParams, Result<Employee>> createEmployeeAction,
-  IHubContext<GameHub> hubContext
+  IGameHubService gameHubService
 ) : IAction<CreateCompanyParams, Result<Company>>
 {
     public async Task<Result<Company>> PerformAsync(CreateCompanyParams actionParams)
@@ -76,7 +77,7 @@ public class CreateCompany(
             }
         }
 
-        await hubContext.Clients.Group(company.Player.Game.Name).SendAsync("CompanyCreated", company.Name);
+        await gameHubService.UpdateCurrentGame(game: player.Game);
 
         return Result.Ok(company);
     }

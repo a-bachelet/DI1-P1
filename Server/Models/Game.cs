@@ -21,6 +21,8 @@ public class Game(string name, int rounds = 15)
 
     public ICollection<Round> RoundsCollection { get; } = [];
 
+    public ICollection<Consultant> Consultants { get; } = [];
+
     public bool CanBeJoined()
     {
         return Status == GameStatus.Waiting && Players.Count < 3;

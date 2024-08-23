@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 using Server.Actions.Contracts;
 using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -29,7 +30,7 @@ public class FinishRound(
     IAction<ApplyRoundActionParams, Result> applyRoundActionAction,
     IAction<StartRoundParams, Result<Round>> startRoundAction,
     IAction<FinishGameParams, Result<Game>> finishGameAction,
-    IHubContext<GameHub> hubContext
+    IGameHubService gameHubService
 ) : IAction<FinishRoundParams, Result<Round>>
 {
     public async Task<Result<Round>> PerformAsync(FinishRoundParams actionParams)
@@ -68,7 +69,7 @@ public class FinishRound(
             var startRoundActionResult = await startRoundAction.PerformAsync(startRoundActionParams);
             var newRound = startRoundActionResult.Value;
 
-            await hubContext.Clients.Group(round.Game.Name).SendAsync("RoundFinished", round.Id);
+            await gameHubService.UpdateCurrentGame(game: round.Game);
 
             return Result.Ok(newRound);
         }
@@ -82,7 +83,7 @@ public class FinishRound(
                 return Result.Fail(finishGameActionResult.Errors);
             }
 
-            await hubContext.Clients.Group(round.Game.Name).SendAsync("RoundFinished", round.Id);
+            await gameHubService.UpdateCurrentGame(game: round.Game);
 
             return Result.Ok(round);
         }

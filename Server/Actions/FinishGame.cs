@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 
 using Server.Actions.Contracts;
 using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 
 namespace Server.Actions;
@@ -22,7 +23,7 @@ public class FinishGameValidator : AbstractValidator<FinishGameParams>
     }
 }
 
-public class FinishGame(IHubContext<GameHub> hubContext) : IAction<FinishGameParams, Result<Game>>
+public class FinishGame(IGameHubService gameHubService) : IAction<FinishGameParams, Result<Game>>
 {
     public Task<Result<Game>> PerformAsync(FinishGameParams actionParams)
     {

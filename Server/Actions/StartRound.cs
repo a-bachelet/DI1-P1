@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 using Server.Actions.Contracts;
 using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -27,7 +28,7 @@ public class StartRoundValidator : AbstractValidator<StartRoundParams>
 public class StartRound(
     IGamesRepository gamesRepository,
     IRoundsRepository roundsRepository,
-    IHubContext<GameHub> hubContext
+    IGameHubService gameHubService
 ) : IAction<StartRoundParams, Result<Round>>
 {
     public async Task<Result<Round>> PerformAsync(StartRoundParams actionParams)
@@ -58,7 +59,7 @@ public class StartRound(
 
         await roundsRepository.SaveRound(round);
 
-        await hubContext.Clients.Group(game.Name).SendAsync("RoundStarted", round.Id);
+        await gameHubService.UpdateCurrentGame(game: round.Game);
 
         return Result.Ok(round);
     }

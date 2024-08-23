@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 
 using Server.Actions.Contracts;
 using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -28,7 +29,7 @@ public class CreateEmployee(
     ICompaniesRepository companiesRepository,
     IEmployeesRepository employeesRepository,
     ISkillsRepository skillsRepository,
-    IHubContext<GameHub> hubContext
+    IGameHubService gameHubService
 ) : IAction<CreateEmployeeParams, Result<Employee>>
 {
     public async Task<Result<Employee>> PerformAsync(CreateEmployeeParams actionParams)
@@ -61,7 +62,7 @@ public class CreateEmployee(
 
         var randomSalary = rnd.Next(salaries.Count() + 1);
 
-        var employee = new Employee(employeeName, company!.Id!.Value, randomSalary);
+        var employee = new Employee(employeeName, company!.Id!.Value, company!.Player.GameId, randomSalary);
 
         var randomSkills = await skillsRepository.GetRandomSkills(3);
 
@@ -72,7 +73,7 @@ public class CreateEmployee(
 
         await employeesRepository.SaveEmployee(employee);
 
-        await hubContext.Clients.Group(employee.Company.Player.Game.Name).SendAsync("EmployeeCreated", employee.Name);
+        await gameHubService.UpdateCurrentGame(game: company.Player.Game);
 
         return Result.Ok(employee);
     }

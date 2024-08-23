@@ -1,6 +1,6 @@
 namespace Server.Models;
 
-public class Consultant(string name, int salaryRequirement)
+public class Consultant(string name, int salaryRequirement, int gameId)
 {
     public int? Id { get; private set; }
 
@@ -9,4 +9,8 @@ public class Consultant(string name, int salaryRequirement)
     public ICollection<ConsultantSkill> Skills { get; } = [];
 
     public int SalaryRequirement { get; set; } = salaryRequirement;
+
+    public int GameId { get; set; } = gameId;
+
+    public Game Game { get; set; } = null!;
 }

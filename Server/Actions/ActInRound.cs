@@ -5,10 +5,8 @@ using FluentResults;
 
 using FluentValidation;
 
-using Microsoft.AspNetCore.SignalR;
-
 using Server.Actions.Contracts;
-using Server.Hubs;
+using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
 
@@ -39,7 +37,7 @@ public class ActInRound(
     IRoundsRepository roundsRepository,
     IPlayersRepository playersRepository,
     IAction<FinishRoundParams, Result<Round>> finishRoundAction,
-    IHubContext<GameHub> hubContext
+    IGameHubService gameHubService
 ) : IAction<ActInRoundParams, Result<Round>>
 {
     public async Task<Result<Round>> PerformAsync(ActInRoundParams actionParams)
@@ -90,7 +88,7 @@ public class ActInRound(
             }
         }
 
-        await hubContext.Clients.Group(round.Game.Name).SendAsync("ActionDoneInRound", roundAction);
+        await gameHubService.UpdateCurrentGame(game: round.Game);
 
         return Result.Ok(round);
     }

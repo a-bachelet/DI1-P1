@@ -23,7 +23,8 @@ public class StartGameValidator : AbstractValidator<StartGameParams>
 public class StartGame(
     IGamesRepository gamesRepository,
     IAction<StartRoundParams, Result<Round>> startRoundAction,
-    IMainHubService mainHubService
+    IMainHubService mainHubService,
+    IGameHubService gameHubService
 ) : IAction<StartGameParams, Result<Game>>
 {
     public async Task<Result<Game>> PerformAsync(StartGameParams actionParams)
@@ -63,6 +64,7 @@ public class StartGame(
         }
 
         await mainHubService.UpdateJoinableGamesList();
+        await gameHubService.UpdateCurrentGame(game: game);
 
         return Result.Ok(game);
     }
