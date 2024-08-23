@@ -1,6 +1,3 @@
-
-using System.Text.Json.Nodes;
-
 using FluentResults;
 
 using FluentValidation;
@@ -10,11 +7,13 @@ using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
 
+using static Server.Models.RoundAction;
+
 namespace Server.Actions;
 
 public sealed record ActInRoundParams(
     RoundActionType ActionType,
-    JsonObject ActionPayload,
+    RoundActionPayload ActionPayload,
     int? RoundId = null,
     Round? Round = null,
     int? PlayerId = null,
@@ -26,6 +25,7 @@ public class ActInRoundValidator : AbstractValidator<ActInRoundParams>
     public ActInRoundValidator()
     {
         RuleFor(p => p.ActionType).NotEmpty();
+        RuleFor(p => p.ActionPayload).NotEmpty();
         RuleFor(p => p.RoundId).NotEmpty().When(p => p.Round is null);
         RuleFor(p => p.Round).NotEmpty().When(p => p.RoundId is null);
         RuleFor(p => p.PlayerId).NotEmpty().When(p => p.Player is null);
@@ -71,7 +71,7 @@ public class ActInRound(
             return Result.Fail("Player cannot act in this round.");
         }
 
-        var roundAction = RoundAction.CreateForType(actionType, player.Id.Value, actionPayload);
+        var roundAction = CreateForType(actionType, player.Id.Value, actionPayload);
 
         round.Actions.Add(roundAction);
 

@@ -1,16 +1,13 @@
-
-
 using FluentResults;
 
 using FluentValidation;
 
-using Microsoft.AspNetCore.SignalR;
-
 using Server.Actions.Contracts;
-using Server.Hubs;
 using Server.Hubs.Contracts;
 using Server.Models;
 using Server.Persistence.Contracts;
+
+using static Server.Models.GenerateNewConsultantRoundAction;
 
 namespace Server.Actions;
 
@@ -30,6 +27,7 @@ public class FinishRound(
     IAction<ApplyRoundActionParams, Result> applyRoundActionAction,
     IAction<StartRoundParams, Result<Round>> startRoundAction,
     IAction<FinishGameParams, Result<Game>> finishGameAction,
+    IAction<ActInRoundParams, Result<Round>> actInRoundAction,
     IGameHubService gameHubService
 ) : IAction<FinishRoundParams, Result<Round>>
 {
@@ -50,6 +48,27 @@ public class FinishRound(
         if (round is null)
         {
             return Result.Fail($"Round with Id \"{roundId}\" not found.");
+        }
+
+        var rnd = new Random();
+
+        var newConsultantShouldBeGenerated = rnd.Next(2) == 1;
+
+        if (newConsultantShouldBeGenerated)
+        {
+            var actInRoundActionParams = new ActInRoundParams(
+                RoundActionType.GenerateNewConsultant,
+                new GenerateNewConsultantPayload { GameId = round.GameId },
+                Round: round,
+                Player: round.Game.Players.First()
+            );
+
+            var actInRoundActionResult = await actInRoundAction.PerformAsync(actInRoundActionParams);
+
+            if (actInRoundActionResult.IsFailed)
+            {
+                return Result.Fail(actInRoundActionResult.Errors);
+            }
         }
 
         foreach (var action in round.Actions)

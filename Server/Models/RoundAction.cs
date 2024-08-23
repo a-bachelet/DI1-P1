@@ -10,7 +10,8 @@ public enum RoundActionType
     ParticipateInCallForTenders,
     RecruitAConsultant,
     FireAnEmployee,
-    PassMyTurn
+    PassMyTurn,
+    GenerateNewConsultant,
 }
 
 [JsonDerivedType(typeof(RoundAction), typeDiscriminator: "DEFAULT")]
@@ -19,9 +20,12 @@ public enum RoundActionType
 [JsonDerivedType(typeof(RecruitAConsultantRoundAction), typeDiscriminator: "RecruitAConsultant")]
 [JsonDerivedType(typeof(FireAnEmployeeRoundAction), typeDiscriminator: "FireAnEmployee")]
 [JsonDerivedType(typeof(PassMyTurnRoundAction), typeDiscriminator: "PassMyTurn")]
+[JsonDerivedType(typeof(GenerateNewConsultantRoundAction), typeDiscriminator: "GenerateNewConsultant")]
 public class RoundAction(int playerId)
 {
-    public static RoundAction CreateForType(RoundActionType actionType, int playerId, JsonObject payload)
+    public class RoundActionPayload { }
+
+    public static RoundAction CreateForType(RoundActionType actionType, int playerId, RoundActionPayload payload)
     {
         RoundAction action = actionType switch
         {
@@ -38,74 +42,89 @@ public class RoundAction(int playerId)
         return action;
     }
 
-    protected virtual void ApplyPayload(JsonObject payload) { }
+    protected virtual void ApplyPayload(RoundActionPayload payload) { }
 
     public int PlayerId { get; init; } = playerId;
 }
 
 public class SendEmployeeForTrainingRoundAction(int playerId) : RoundAction(playerId)
 {
-    public class SendEmployeeForTrainingPayload
+    public class SendEmployeeForTrainingPayload : RoundActionPayload
     {
         public int EmployeeId { get; init; }
     }
 
     public SendEmployeeForTrainingPayload Payload { get; private set; } = null!;
 
-    protected override void ApplyPayload(JsonObject payload)
+    protected override void ApplyPayload(RoundActionPayload payload)
     {
-        Payload = JsonSerializer.Deserialize<SendEmployeeForTrainingPayload>(payload)!;
+        Payload = (SendEmployeeForTrainingPayload) payload;
     }
 }
 
 public class ParticipateInCallForTendersRoundAction(int playerId) : RoundAction(playerId)
 {
-    public class ParticipateInCallForTendersPayload
+    public class ParticipateInCallForTendersPayload : RoundActionPayload
     {
         public int CallForTendersId { get; init; }
     }
 
     public ParticipateInCallForTendersPayload Payload { get; private set; } = null!;
 
-    protected override void ApplyPayload(JsonObject payload)
+    protected override void ApplyPayload(RoundActionPayload payload)
     {
-        Payload = JsonSerializer.Deserialize<ParticipateInCallForTendersPayload>(payload)!;
+        Payload = (ParticipateInCallForTendersPayload) payload;
     }
 }
 
 public class RecruitAConsultantRoundAction(int playerId) : RoundAction(playerId)
 {
-    public class RecruitAConsultantPayload
+    public class RecruitAConsultantPayload : RoundActionPayload
     {
         public int ConsultantId { get; init; }
     }
 
     public RecruitAConsultantPayload Payload { get; private set; } = null!;
 
-    protected override void ApplyPayload(JsonObject payload)
+    protected override void ApplyPayload(RoundActionPayload payload)
     {
-        Payload = JsonSerializer.Deserialize<RecruitAConsultantPayload>(payload)!;
+        Payload = (RecruitAConsultantPayload) payload;
     }
 }
 
 public class FireAnEmployeeRoundAction(int playerId) : RoundAction(playerId)
 {
-    public class FireAnEmployeePayload
+    public class FireAnEmployeePayload : RoundActionPayload
     {
         public int EmployeeId { get; init; }
     }
 
     public FireAnEmployeePayload Payload { get; private set; } = null!;
 
-    protected override void ApplyPayload(JsonObject payload)
+    protected override void ApplyPayload(RoundActionPayload payload)
     {
-        Payload = JsonSerializer.Deserialize<FireAnEmployeePayload>(payload)!;
+        Payload = (FireAnEmployeePayload) payload;
     }
 }
 
 public class PassMyTurnRoundAction(int playerId) : RoundAction(playerId)
 {
-    protected override void ApplyPayload(JsonObject payload)
+    protected override void ApplyPayload(RoundActionPayload payload)
     {
+    }
+}
+
+public class GenerateNewConsultantRoundAction(int gameId) : RoundAction(gameId)
+{
+    public class GenerateNewConsultantPayload : RoundActionPayload
+    {
+        public int GameId { get; init; }
+    }
+
+    public GenerateNewConsultantPayload Payload { get; private set; } = null!;
+
+    protected override void ApplyPayload(RoundActionPayload payload)
+    {
+        Payload = (GenerateNewConsultantPayload) payload;
     }
 }
