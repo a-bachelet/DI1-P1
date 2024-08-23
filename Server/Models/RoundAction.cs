@@ -1,5 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Server.Models;
@@ -21,11 +19,11 @@ public enum RoundActionType
 [JsonDerivedType(typeof(FireAnEmployeeRoundAction), typeDiscriminator: "FireAnEmployee")]
 [JsonDerivedType(typeof(PassMyTurnRoundAction), typeDiscriminator: "PassMyTurn")]
 [JsonDerivedType(typeof(GenerateNewConsultantRoundAction), typeDiscriminator: "GenerateNewConsultant")]
-public class RoundAction(int playerId)
+public class RoundAction(int? playerId)
 {
     public class RoundActionPayload { }
 
-    public static RoundAction CreateForType(RoundActionType actionType, int playerId, RoundActionPayload payload)
+    public static RoundAction CreateForType(RoundActionType actionType, int? playerId, RoundActionPayload payload)
     {
         RoundAction action = actionType switch
         {
@@ -44,10 +42,10 @@ public class RoundAction(int playerId)
 
     protected virtual void ApplyPayload(RoundActionPayload payload) { }
 
-    public int PlayerId { get; init; } = playerId;
+    public int? PlayerId { get; init; } = playerId;
 }
 
-public class SendEmployeeForTrainingRoundAction(int playerId) : RoundAction(playerId)
+public class SendEmployeeForTrainingRoundAction(int? playerId) : RoundAction(playerId)
 {
     public class SendEmployeeForTrainingPayload : RoundActionPayload
     {
@@ -62,7 +60,7 @@ public class SendEmployeeForTrainingRoundAction(int playerId) : RoundAction(play
     }
 }
 
-public class ParticipateInCallForTendersRoundAction(int playerId) : RoundAction(playerId)
+public class ParticipateInCallForTendersRoundAction(int? playerId) : RoundAction(playerId)
 {
     public class ParticipateInCallForTendersPayload : RoundActionPayload
     {
@@ -77,7 +75,7 @@ public class ParticipateInCallForTendersRoundAction(int playerId) : RoundAction(
     }
 }
 
-public class RecruitAConsultantRoundAction(int playerId) : RoundAction(playerId)
+public class RecruitAConsultantRoundAction(int? playerId) : RoundAction(playerId)
 {
     public class RecruitAConsultantPayload : RoundActionPayload
     {
@@ -92,7 +90,7 @@ public class RecruitAConsultantRoundAction(int playerId) : RoundAction(playerId)
     }
 }
 
-public class FireAnEmployeeRoundAction(int playerId) : RoundAction(playerId)
+public class FireAnEmployeeRoundAction(int? playerId) : RoundAction(playerId)
 {
     public class FireAnEmployeePayload : RoundActionPayload
     {
@@ -107,14 +105,14 @@ public class FireAnEmployeeRoundAction(int playerId) : RoundAction(playerId)
     }
 }
 
-public class PassMyTurnRoundAction(int playerId) : RoundAction(playerId)
+public class PassMyTurnRoundAction(int? playerId) : RoundAction(playerId)
 {
     protected override void ApplyPayload(RoundActionPayload payload)
     {
     }
 }
 
-public class GenerateNewConsultantRoundAction(int gameId) : RoundAction(gameId)
+public class GenerateNewConsultantRoundAction(int? gameId) : RoundAction(gameId)
 {
     public class GenerateNewConsultantPayload : RoundActionPayload
     {

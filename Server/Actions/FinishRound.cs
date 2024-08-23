@@ -27,7 +27,6 @@ public class FinishRound(
     IAction<ApplyRoundActionParams, Result> applyRoundActionAction,
     IAction<StartRoundParams, Result<Round>> startRoundAction,
     IAction<FinishGameParams, Result<Game>> finishGameAction,
-    IAction<ActInRoundParams, Result<Round>> actInRoundAction,
     IGameHubService gameHubService
 ) : IAction<FinishRoundParams, Result<Round>>
 {
@@ -56,19 +55,15 @@ public class FinishRound(
 
         if (newConsultantShouldBeGenerated)
         {
-            var actInRoundActionParams = new ActInRoundParams(
+            var action = RoundAction.CreateForType(
                 RoundActionType.GenerateNewConsultant,
-                new GenerateNewConsultantPayload { GameId = round.GameId },
-                Round: round,
-                Player: round.Game.Players.First()
+                null,
+                new GenerateNewConsultantPayload { GameId = round.GameId }
             );
 
-            var actInRoundActionResult = await actInRoundAction.PerformAsync(actInRoundActionParams);
+            round.Actions.Add(action);
 
-            if (actInRoundActionResult.IsFailed)
-            {
-                return Result.Fail(actInRoundActionResult.Errors);
-            }
+            await roundsRepository.SaveRound(round);
         }
 
         foreach (var action in round.Actions)

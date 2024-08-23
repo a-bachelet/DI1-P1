@@ -59,6 +59,9 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
                 .HasValue<Consultant>("Consultant")
                 .HasValue<Employee>("Employee");
             e.Property(e => e.Name).HasColumnType("varchar(255)");
+            e.HasOne(e => e.Game)
+                .WithMany(e => e.Consultants)
+                .HasForeignKey(e => e.GameId);
             e.OwnsMany(e => e.Skills, builder => builder.ToJson());
         });
 
@@ -82,6 +85,9 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
                 .HasDefaultValue(GameStatus.Waiting)
                 .HasConversion(new EnumToStringConverter<GameStatus>());
             e.HasMany(e => e.Players)
+                .WithOne(e => e.Game)
+                .HasForeignKey(e => e.GameId);
+            e.HasMany(e => e.Consultants)
                 .WithOne(e => e.Game)
                 .HasForeignKey(e => e.GameId);
             e.HasMany(e => e.RoundsCollection)
