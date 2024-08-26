@@ -14,7 +14,7 @@ public static class MainMenuScreen
 
         return mainOption switch
         {
-            MainMenuPrompt.MainMenuOption.CREATE_GAME => true,
+            MainMenuPrompt.MainMenuOption.CREATE_GAME => await CreateGameScreen.Show(),
             MainMenuPrompt.MainMenuOption.JOIN_GAME => await JoinGameScreen.Show(),
             MainMenuPrompt.MainMenuOption.QUIT => true,
             _ => true,

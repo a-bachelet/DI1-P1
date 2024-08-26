@@ -37,7 +37,9 @@ public class GameHubService(IHubContext<GameHub, IGameHubClient> gameHubContext,
 
         var data = new GameOverview(
             (int) game!.Id!, game.Name,
-            game.Players.Select(p => new PlayerOverview((int) p.Id!, p.Name)).ToList()
+            game.Players.Select(p => new PlayerOverview((int) p.Id!, p.Name)).ToList(),
+            game.Players.Count,
+            3
         );
 
         caller ??= gameHubContext.Clients.Group($"{game.Id}__{game.Name}");

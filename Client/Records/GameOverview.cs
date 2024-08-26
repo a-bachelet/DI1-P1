@@ -1,4 +1,4 @@
-namespace Server.Hubs.Records;
+namespace Client.Records;
 
 public sealed record GameOverview(
     int Id,

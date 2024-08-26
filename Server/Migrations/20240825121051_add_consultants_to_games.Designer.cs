@@ -12,7 +12,7 @@ using Server.Persistence;
 namespace Server.Migrations
 {
     [DbContext(typeof(WssDbContext))]
-    [Migration("20240823200140_add_consultants_to_games")]
+    [Migration("20240825121051_add_consultants_to_games")]
     partial class add_consultants_to_games
     {
         /// <inheritdoc />

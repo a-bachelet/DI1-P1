@@ -13,7 +13,7 @@ namespace Client.Screens;
 
 public static class JoinGameScreen
 {
-    static ICollection<JoinableGame> games = [];
+    static readonly ICollection<JoinableGame> games = [];
 
     public static async Task<bool> Show()
     {

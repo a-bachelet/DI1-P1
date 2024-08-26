@@ -60,8 +60,9 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
                 .HasValue<Employee>("Employee");
             e.Property(e => e.Name).HasColumnType("varchar(255)");
             e.HasOne(e => e.Game)
-                .WithMany(e => e.Consultants)
-                .HasForeignKey(e => e.GameId);
+                .WithMany()
+                .HasForeignKey(e => e.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
             e.OwnsMany(e => e.Skills, builder => builder.ToJson());
         });
 

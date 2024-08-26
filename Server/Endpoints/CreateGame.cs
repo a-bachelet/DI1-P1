@@ -32,6 +32,7 @@ public class CreateGame : IEndpoint
         }
 
         await transaction.CommitAsync();
-        return Results.Created();
+
+        return Results.Created((string) null!, new { actionResult.Value.Id });
     }
 }

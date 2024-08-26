@@ -1,6 +1,6 @@
 namespace Server.Models;
 
-public class Employee(string name, int companyId, int gameId, int salary) : Consultant(name, gameId, salary)
+public class Employee(string name, int companyId, int gameId, int salary) : Consultant(name, salary, gameId)
 {
     public int CompanyId { get; set; } = companyId;
 
