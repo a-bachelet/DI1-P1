@@ -1,33 +1,40 @@
-using Spectre.Console;
+using Terminal.Gui;
 
 namespace Client.Screens;
 
-public class TitleScreen
+public class TitleScreen(Window target)
 {
-    public static async Task<bool> Show()
+    public Window Target { get; } = target;
+
+    public async Task Show()
     {
-        Console.Clear();
+        await BeforeShow();
+        await ShowTitle();
+    }
 
-        var titlePanel = new Panel("");
+    private Task BeforeShow()
+    {
+        Target.RemoveAll();
+        Target.Title = "";
+        return Task.CompletedTask;
+    }
 
-        await AnsiConsole.Live(titlePanel).StartAsync(async ctx =>
+    private async Task ShowTitle()
+    {
+        var titleLabel = new Label() { X = Pos.Center(), Y = Pos.Center() };
+
+        Target.Add(titleLabel);
+
+        var titleText = "Why So Serious ?";
+        var displayedText = "";
+
+        foreach (var character in titleText)
         {
-            var titleText = "Why So Serious ?";
-            var displayedText = "";
+            displayedText += character;
+            titleLabel.Text = displayedText;
+            await Task.Delay(100);
+        }
 
-            foreach (var character in titleText)
-            {
-                displayedText += character;
-                titlePanel = new Panel(new FigletText(displayedText).Centered().Color(Color.Red));
-                ctx.UpdateTarget(titlePanel);
-                ctx.Refresh();
-
-                await Task.Delay(100);
-            }
-
-            await Task.Delay(500);
-        });
-
-        return false;
+        await Task.Delay(500);
     }
 }

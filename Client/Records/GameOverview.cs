@@ -12,4 +12,3 @@ public sealed record PlayerOverview(
     int Id,
     string Name
 );
-

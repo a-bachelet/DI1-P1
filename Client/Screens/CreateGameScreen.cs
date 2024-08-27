@@ -1,45 +1,225 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 
-using Client.Prompts;
-
 using Spectre.Console;
+
+using Terminal.Gui;
 
 namespace Client.Screens;
 
-public static class CreateGameScreen
+public class CreateGameScreen(Window target)
 {
-    public static async Task<bool> Show()
+    private Window Target { get; } = target;
+    private readonly CreateGameForm Form = new();
+
+    private int? GameId = null;
+
+    private bool Submitted = false;
+    private bool Returned = false;
+    private bool Errored = false;
+
+    public async Task Show()
     {
+        await BeforeShow();
+        await DisplayForm();
+
+        if (Returned) {
+            await Return();
+            return;
+        }
+
+        await CreateGame();
+
+        if (Errored) {
+            await DisplayForm(true);
+
+            if (Returned) {
+                await Return();
+                return;
+            }
+        }
+
         AnsiConsole.Clear();
+        AnsiConsole.WriteLine(GameId!.ToString()!);
 
-        var (gameName, playerName, companyName, rounds) = CreateGamePrompt.Show();
+        await Task.Delay(5000);
+    }
 
-        var httpClient = new HttpClient(new HttpClientHandler { ServerCertificateCustomValidationCallback = (_, __, ___, ____) => true }) {
-            BaseAddress = new Uri("https://localhost:7032")
+    private Task BeforeShow()
+    {
+        Target.RemoveAll();
+        Target.Title = $"{MainWindow.Title} - [Create Game]";
+        return Task.CompletedTask;
+    }
+
+    private async Task Return()
+    {
+        var mainMenuScreen = new MainMenuScreen(Target);
+        await mainMenuScreen.Show();
+    }
+
+    private async Task DisplayForm(bool errored = false)
+    {
+        Form.OnReturn = () => Returned = true;
+        Form.OnSubmit = () => Submitted = true;
+
+        Target.Add(Form.FormView);
+
+        while (!Returned && !Submitted) {
+            await Task.Delay(100);
+        }
+    }
+
+    private async Task CreateGame()
+    {
+        Target.Remove(Form.FormView);
+
+        var loadingDialog = new Dialog("", 18, 3);
+        var loadingText = new Label("Creating game...");
+
+        loadingDialog.Add(loadingText);
+
+        Target.Add(loadingDialog);
+
+        var httpHandler = new HttpClientHandler {
+            ServerCertificateCustomValidationCallback = (_, __, ___, ____) => true
         };
+
+        var httpClient = new HttpClient(httpHandler) {
+            BaseAddress = new Uri("https://localhost:7032"),
+        };
+
+        var gameName = Form.GameNameField.Text.ToString();
+        var playerName = Form.PlayerNameField.Text.ToString();
+        var companyName = Form.CompanyNameField.Text.ToString();
+        var rounds = int.Parse(Form.RoundsField.Text.ToString()!);
+
         var requestBody = new {gameName, playerName, companyName, rounds};
         var request = httpClient.PostAsJsonAsync("/games", requestBody);
         var response = await request;
 
         if (!response.IsSuccessStatusCode)
         {
-            return true;
+            Errored = true;
         }
-
-
-        try {
-            var content = await response.Content.ReadFromJsonAsync<JsonElement>();
-            var gameId = content.GetProperty("id").GetInt32();
-
-            return await new CurrentGameScreen(gameId, playerName).Show();
+        else
+        {
+            try {
+                var content = await response.Content.ReadFromJsonAsync<JsonElement>();
+                GameId = content.GetProperty("id").GetInt32();
+            }
+            catch(Exception e) {
+                AnsiConsole.Clear();
+                AnsiConsole.Write(new Markup("[red]Error: An error occured[/]\n"));
+                AnsiConsole.WriteException(e);
+            }
         }
-        catch(Exception e) {
-            AnsiConsole.Clear();
-            AnsiConsole.Write(new Markup("[red]Error: An error occured[/]\n"));
-            AnsiConsole.WriteException(e);
+    }
+}
 
-            return true;
+public class CreateGameForm
+{
+    private Action _onSubmit = () => {};
+    private Action _onReturn = () => {};
+
+    public Action OnSubmit
+    {
+        get => _onSubmit;
+        set
+        {
+            SubmitButton.Clicked -= _onSubmit;
+            SubmitButton.Clicked += value;
+            _onSubmit = value;
         }
+    }
+    public Action OnReturn
+    {
+        get => _onReturn;
+        set
+        {
+            ReturnButton.Clicked -= _onReturn;
+            ReturnButton.Clicked += value;
+            _onReturn = value;
+        }
+    }
+
+    public View FormView { get; }
+    public View ButtonsView { get; }
+    public Button SubmitButton { get; }
+    public Button ReturnButton { get; }
+    public Label GameNameLabel { get; }
+    public Label PlayerNameLabel { get; }
+    public Label CompanyNameLabel { get; }
+    public Label RoundsLabel { get; }
+    public TextField GameNameField { get; }
+    public TextField PlayerNameField { get; }
+    public TextField CompanyNameField { get; }
+    public TextField RoundsField { get; }
+
+    public CreateGameForm()
+    {
+        GameNameLabel = new Label("Game name :") {
+            X = 0, Y = 0, Width = 20
+        };
+
+        PlayerNameLabel = new Label("Player name :") {
+            X = Pos.Left(GameNameLabel), Y = Pos.Bottom(GameNameLabel) + 1, Width = 20
+        };
+
+        CompanyNameLabel = new Label("Company name :") {
+            X = Pos.Left(PlayerNameLabel), Y = Pos.Bottom(PlayerNameLabel) + 1, Width = 20
+        };
+
+        RoundsLabel = new Label("Rounds (15 - 100) :") {
+            X = Pos.Left(CompanyNameLabel), Y = Pos.Bottom(CompanyNameLabel) + 1, Width = 20
+        };
+
+        GameNameField = new TextField("") {
+            X = Pos.Right(GameNameLabel), Y = Pos.Top(GameNameLabel), Width = Dim.Fill()
+        };
+
+        PlayerNameField = new TextField("") {
+            X = Pos.Right(PlayerNameLabel), Y = Pos.Top(PlayerNameLabel), Width = Dim.Fill()
+        };
+
+        CompanyNameField = new TextField("") {
+            X = Pos.Right(CompanyNameLabel), Y = Pos.Top(CompanyNameLabel), Width = Dim.Fill()
+        };
+
+        RoundsField = new TextField("") {
+            X = Pos.Right(RoundsLabel), Y = Pos.Top(RoundsLabel), Width = Dim.Fill()
+        };
+
+        ButtonsView = new View() {
+            Width = 1, Height = 1, X = Pos.Center(), Y = Pos.Bottom(RoundsLabel) + 1
+        };
+
+        SubmitButton = new Button() {
+            Text = "Submit", IsDefault = true
+        };
+
+        ReturnButton = new Button() {
+            Text = "Return", IsDefault = false, X = Pos.Right(SubmitButton) + 1
+        };
+
+        SubmitButton.Clicked += OnSubmit;
+        ReturnButton.Clicked += OnReturn;
+
+        ButtonsView.Add(SubmitButton, ReturnButton);
+
+        SubmitButton.GetCurrentWidth(out var submitButtonWidth);
+        ReturnButton.GetCurrentWidth(out var returnButtonWidth);
+
+        ButtonsView.Width = submitButtonWidth + returnButtonWidth + 1;
+
+        FormView = new View() {
+            Width = Dim.Fill(), Height = Dim.Fill()
+        };
+
+        FormView.Add(
+            GameNameLabel, PlayerNameLabel, CompanyNameLabel, RoundsLabel,
+            GameNameField, PlayerNameField, CompanyNameField, RoundsField,
+            ButtonsView
+        );
     }
 }
