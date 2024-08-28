@@ -7,6 +7,7 @@ namespace Client.Screens;
 public class MainMenuScreen(Window target)
 {
     public Window Target { get; } = target;
+    private MainMenuActionList ActionList = new();
 
     public MainMenuActionList.Action? Action { get; private set; } = null;
 
@@ -34,12 +35,14 @@ public class MainMenuScreen(Window target)
 
     private async Task SelectAction()
     {
-        var actionList = new MainMenuActionList() {
-            X = 0, Y = 0, Width = Dim.Fill(), Height = Dim.Fill()
-        };
+        ActionList.X = ActionList.Y = Pos.Center();
+        ActionList.Width = 13;
+        ActionList.Height = 3;
 
-        Target.Add(actionList);
-        actionList.OpenSelectedItem += (selected) => { Action = (MainMenuActionList.Action) selected.Value; };
+        ActionList.OpenSelectedItem += (selected) => { Action = (MainMenuActionList.Action) selected.Value; };
+
+        Target.Add(ActionList);
+
         while (Action is null) { await Task.Delay(100); };
     }
 }

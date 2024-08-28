@@ -15,6 +15,7 @@ public class JoinGameScreen(Window target)
 {
     private Window Target { get; } = target;
     private readonly ListView GamesList = new();
+    private readonly Button ReturnButton = new("Return");
 
     private ICollection<JoinableGame> _joinableGames = [];
     private ICollection<JoinableGame> JoinableGames
@@ -61,7 +62,6 @@ public class JoinGameScreen(Window target)
     {
         var dataSource = new JoinGameChoiceListDataSource();
         dataSource.AddRange(JoinableGames);
-        dataSource.Add(new JoinableGame(0, "", 0, 0));
         GamesList.Source = dataSource;
     }
 
@@ -105,16 +105,20 @@ public class JoinGameScreen(Window target)
 
     private async Task SelectGame()
     {
-        GamesList.X = GamesList.Y = 0;
-        GamesList.Width = GamesList.Height = Dim.Fill();
+        GamesList.X = GamesList.Y = Pos.Center();
+        GamesList.Width = JoinableGames.Max(g => g.Name.Length);
+        GamesList.Height = Math.Min(JoinableGames.Count, 20);
+
+        ReturnButton.X = Pos.Center();
+        ReturnButton.Y = Pos.Bottom(GamesList) + 1;
+        ReturnButton.Clicked += () => Returned = true;
 
         Target.Add(GamesList);
-        GamesList.OpenSelectedItem += (selected) => {
-            GameId = ((JoinableGame) selected.Value).Id;
-            if (GameId == 0) { Returned = true; }
-        };
+        Target.Add(ReturnButton);
 
-        while (GameId is null) { await Task.Delay(100); };
+        GamesList.OpenSelectedItem += (selected) => GameId = ((JoinableGame) selected.Value).Id;
+
+        while (GameId is null && !Returned) { await Task.Delay(100); };
     }
 }
 

@@ -63,6 +63,10 @@ public class CreateGameScreen(Window target)
         Form.OnReturn = () => Returned = true;
         Form.OnSubmit = () => Submitted = true;
 
+        Form.FormView.X = Form.FormView.Y = Pos.Center();
+        Form.FormView.Width = 50;
+        Form.FormView.Height = 9;
+
         Target.Add(Form.FormView);
 
         while (!Returned && !Submitted) {
