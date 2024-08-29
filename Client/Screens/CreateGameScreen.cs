@@ -31,18 +31,22 @@ public class CreateGameScreen(Window target)
         await CreateGame();
 
         if (Errored) {
+            Submitted = false;
+            Returned = false;
+
             await DisplayForm(true);
 
             if (Returned) {
                 await Return();
                 return;
             }
+
+            return;
         }
 
-        AnsiConsole.Clear();
-        AnsiConsole.WriteLine(GameId!.ToString()!);
+        var currentGameScreen = new CurrentGameScreen(Target, (int) GameId!, Form.PlayerNameField.Text.ToString()!);
 
-        await Task.Delay(5000);
+        await currentGameScreen.Show();
     }
 
     private Task BeforeShow()
