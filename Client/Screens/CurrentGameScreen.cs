@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Data;
 using System.Xml;
 
@@ -6,6 +7,8 @@ using Client.Records;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 
+using Spectre.Console;
+
 using Terminal.Gui;
 
 namespace Client.Screens;
@@ -13,7 +16,7 @@ namespace Client.Screens;
 public class CurrentGameScreen(Window target, int gameId, string playerName)
 {
     private readonly Window Target = target;
-    private View? CurrentView = null;
+    private CurrentGameView? CurrentView = null;
 
     private readonly int GameId = gameId;
     private readonly string PlayerName = playerName;
@@ -60,8 +63,9 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
             .AddJsonProtocol()
             .Build();
 
-        hubConnection.On<GameOverview>("CurrentGameUpdated", data => {
+        hubConnection.On<GameOverview>("CurrentGameUpdated", async data => {
             CurrentGame = data;
+            if (CurrentView is not null) { await CurrentView.Refresh(CurrentGame); };
             CurrentGameLoading = false;
         });
 
@@ -99,9 +103,14 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
     }
 }
 
-public class CurrentGameMainView : View
+public abstract class CurrentGameView : View
 {
-    private readonly GameOverview Game;
+    public abstract Task Refresh(GameOverview game);
+}
+
+public class CurrentGameMainView : CurrentGameView
+{
+    private GameOverview Game;
     private readonly string PlayerName;
 
     private readonly FrameView Players = new();
@@ -114,11 +123,21 @@ public class CurrentGameMainView : View
         SetupPlayers();
     }
 
+    public override Task Refresh(GameOverview game)
+    {
+        Game = game;
+
+        Remove(Players);
+        SetupPlayers();
+
+        return Task.CompletedTask;
+    }
+
     private void SetupPlayers()
     {
-        Players.Title = "Players";
-        Players.X = 0;
-        Players.Y = 1;
+        Players.Title = $"Players ({Game.PlayersCount}/{Game.MaximumPlayersCount})";
+        Players.X = Pos.Center();
+        Players.Y = Pos.Center();
         Players.Width = Dim.Auto(DimAutoStyle.Content);
         Players.Height = 6 + Game.Players.Count;
 
