@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Specialized;
 
 using Terminal.Gui;
 
@@ -39,9 +40,12 @@ public class MainMenuScreen(Window target)
         ActionList.Width = 13;
         ActionList.Height = 3;
 
-        ActionList.OpenSelectedItem += (selected) => { Action = (MainMenuActionList.Action) selected.Value; };
+        ActionList.OpenSelectedItem += (_, selected) => { Action = (MainMenuActionList.Action) selected.Value; };
 
         Target.Add(ActionList);
+
+        ActionList.SetFocus();
+        ActionList.MoveHome();
 
         while (Action is null) { await Task.Delay(100); };
     }
@@ -70,6 +74,15 @@ public class MainMenuActionList : ListView
 public class MainMenuActionListDataSource : List<MainMenuActionList.Action>, IListDataSource
 {
     public int Length => Count;
+
+    public bool SuspendCollectionChangedEvent { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    public event NotifyCollectionChangedEventHandler CollectionChanged  = (_, __) => {};
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
 
     public bool IsMarked(int item)
     {

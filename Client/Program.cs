@@ -9,8 +9,7 @@ public class Program
     static void Main()
     {
         Application.Init();
-        Colors.Base.Normal = Application.Driver.MakeAttribute(Color.Blue, Color.Black);
-        Application.MainLoop.Invoke(async () => {
+        Application.Invoke(async () => {
             var mainWindow = (MainWindow) Application.Top;
 
             var titleScreen = new TitleScreen(mainWindow);
@@ -34,5 +33,12 @@ public class MainWindow : Window
     {
         Width = Dim.Fill();
         Height = Dim.Fill();
+        ColorScheme = new ColorScheme(
+            new Terminal.Gui.Attribute(Color.Blue, Color.Black),
+            new Terminal.Gui.Attribute(Color.Black, Color.White),
+            new Terminal.Gui.Attribute(Color.Black, Color.White),
+            new Terminal.Gui.Attribute(Color.Gray, Color.White),
+            new Terminal.Gui.Attribute(Color.Black, Color.White)
+        );
     }
 }

@@ -1,9 +1,10 @@
+using System.Data;
+using System.Xml;
+
 using Client.Records;
 
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
-
-using Spectre.Console;
 
 using Terminal.Gui;
 
@@ -12,32 +13,31 @@ namespace Client.Screens;
 public class CurrentGameScreen(Window target, int gameId, string playerName)
 {
     private readonly Window Target = target;
+    private View? CurrentView = null;
 
     private readonly int GameId = gameId;
-
     private readonly string PlayerName = playerName;
-
-    private bool Loading = true;
-
     private GameOverview? CurrentGame = null;
+
+    private bool CurrentGameLoading = true;
 
     public async Task Show()
     {
         await BeforeShow();
         await LoadGame();
+        await DisplayMainView();
 
-        AnsiConsole.Clear();
-        AnsiConsole.WriteLine(CurrentGame!.Id!.ToString()!);
-        AnsiConsole.WriteLine(CurrentGame!.Name!.ToString()!);
-        AnsiConsole.WriteLine(CurrentGame!.Players!.ToString()!);
-
-        await Task.Delay(5000);
+        await Task.Delay(1000000000);
     }
 
     private Task BeforeShow()
     {
         Target.RemoveAll();
-        Target.Title = $"{MainWindow.Title} - [Current Game]";
+
+        var gameName = CurrentGame is null ? "..." : CurrentGame.Name;
+
+        Target.Title = $"{MainWindow.Title} - [Game {gameName}]";
+
         return Task.CompletedTask;
     }
 
@@ -62,20 +62,98 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
 
         hubConnection.On<GameOverview>("CurrentGameUpdated", data => {
             CurrentGame = data;
-            Loading = false;
+            CurrentGameLoading = false;
         });
 
         await hubConnection.StartAsync();
 
-        var loadingDialog = new Dialog("", 17, 3);
-        var loadingText = new Label("Loading game...");
+        var loadingDialog = new Dialog() {
+            Width = 17, Height = 3
+        };
+
+        var loadingText = new Label() {
+            Text = "Loading game...", X = Pos.Center(), Y = Pos.Center()
+        };
 
         loadingDialog.Add(loadingText);
 
         Target.Add(loadingDialog);
 
-        while (Loading) { await Task.Delay(100); }
+        while (CurrentGameLoading) { await Task.Delay(100); }
 
         Target.Remove(loadingDialog);
+    }
+
+    private Task DisplayMainView()
+    {
+        var mainView = new CurrentGameMainView(CurrentGame!, PlayerName);
+
+        CurrentView = mainView;
+
+        mainView.X = mainView.Y = 0;
+        mainView.Width = mainView.Height = Dim.Fill();
+
+        Target.Add(mainView);
+
+        return Task.CompletedTask;
+    }
+}
+
+public class CurrentGameMainView : View
+{
+    private readonly GameOverview Game;
+    private readonly string PlayerName;
+
+    private readonly FrameView Players = new();
+
+    public CurrentGameMainView(GameOverview game, string playerName)
+    {
+        Game = game;
+        PlayerName = playerName;
+
+        SetupPlayers();
+    }
+
+    private void SetupPlayers()
+    {
+        Players.Title = "Players";
+        Players.X = 0;
+        Players.Y = 1;
+        Players.Width = Dim.Auto(DimAutoStyle.Content);
+        Players.Height = 6 + Game.Players.Count;
+
+        Add(Players);
+
+        var dataTable = new DataTable();
+
+        dataTable.Columns.Add("Name");
+        dataTable.Columns.Add("Company");
+        dataTable.Columns.Add("Treasury");
+        dataTable.Columns.Add("⭐");
+
+        foreach (var player in Game.Players)
+        {
+            dataTable.Rows.Add([
+                player.Name,
+                "My Company",
+                "1.000.000$",
+                PlayerName == player.Name ? "⭐" : ""
+            ]);
+        }
+
+        var dataTableSource = new DataTableSource(dataTable);
+
+        var tableView = new TableView() {
+            X = 0, Y= 0,
+            Width = Game.Players.Max(p => p.Name.Length) + "My Company".Length + "1.000.000$".Length + "⭐".Length + 6,
+            Height = Dim.Fill(),
+            Table = dataTableSource,
+            Style = new TableStyle {
+                ShowHorizontalBottomline = true,
+                ExpandLastColumn = false,
+            }
+        };
+
+        Players.Add(tableView);
     }
 }

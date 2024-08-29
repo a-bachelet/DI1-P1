@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -64,8 +65,8 @@ public class CreateGameScreen(Window target)
 
     private async Task DisplayForm(bool errored = false)
     {
-        Form.OnReturn = () => Returned = true;
-        Form.OnSubmit = () => Submitted = true;
+        Form.OnReturn = (_, __) => Returned = true;
+        Form.OnSubmit = (_, __) => Submitted = true;
 
         Form.FormView.X = Form.FormView.Y = Pos.Center();
         Form.FormView.Width = 50;
@@ -82,8 +83,13 @@ public class CreateGameScreen(Window target)
     {
         Target.Remove(Form.FormView);
 
-        var loadingDialog = new Dialog("", 18, 3);
-        var loadingText = new Label("Creating game...");
+        var loadingDialog = new Dialog() {
+            Width = 18, Height = 3
+        };
+
+        var loadingText = new Label() {
+            Text = "Creating game...", X = Pos.Center(), Y = Pos.Center()
+        };
 
         loadingDialog.Add(loadingText);
 
@@ -127,26 +133,26 @@ public class CreateGameScreen(Window target)
 
 public class CreateGameForm
 {
-    private Action _onSubmit = () => {};
-    private Action _onReturn = () => {};
+    private EventHandler<HandledEventArgs> _onSubmit = (_, __) => {};
+    private EventHandler<HandledEventArgs> _onReturn = (_, __) => {};
 
-    public Action OnSubmit
+    public EventHandler<HandledEventArgs> OnSubmit
     {
         get => _onSubmit;
         set
         {
-            SubmitButton.Clicked -= _onSubmit;
-            SubmitButton.Clicked += value;
+            SubmitButton.Accept -= _onSubmit;
+            SubmitButton.Accept += value;
             _onSubmit = value;
         }
     }
-    public Action OnReturn
+    public EventHandler<HandledEventArgs> OnReturn
     {
         get => _onReturn;
         set
         {
-            ReturnButton.Clicked -= _onReturn;
-            ReturnButton.Clicked += value;
+            ReturnButton.Accept -= _onReturn;
+            ReturnButton.Accept += value;
             _onReturn = value;
         }
     }
@@ -166,36 +172,36 @@ public class CreateGameForm
 
     public CreateGameForm()
     {
-        GameNameLabel = new Label("Game name :") {
-            X = 0, Y = 0, Width = 20
+        GameNameLabel = new Label() {
+            X = 0, Y = 0, Width = 20, Text = "Game name :"
         };
 
-        PlayerNameLabel = new Label("Player name :") {
-            X = Pos.Left(GameNameLabel), Y = Pos.Bottom(GameNameLabel) + 1, Width = 20
+        PlayerNameLabel = new Label() {
+            X = Pos.Left(GameNameLabel), Y = Pos.Bottom(GameNameLabel) + 1, Width = 20, Text = "Player name :"
         };
 
-        CompanyNameLabel = new Label("Company name :") {
-            X = Pos.Left(PlayerNameLabel), Y = Pos.Bottom(PlayerNameLabel) + 1, Width = 20
+        CompanyNameLabel = new Label() {
+            X = Pos.Left(PlayerNameLabel), Y = Pos.Bottom(PlayerNameLabel) + 1, Width = 20, Text = "Company name :"
         };
 
-        RoundsLabel = new Label("Rounds (15 - 100) :") {
-            X = Pos.Left(CompanyNameLabel), Y = Pos.Bottom(CompanyNameLabel) + 1, Width = 20
+        RoundsLabel = new Label() {
+            X = Pos.Left(CompanyNameLabel), Y = Pos.Bottom(CompanyNameLabel) + 1, Width = 20, Text = "Rounds (15 - 100) :"
         };
 
-        GameNameField = new TextField("") {
-            X = Pos.Right(GameNameLabel), Y = Pos.Top(GameNameLabel), Width = Dim.Fill()
+        GameNameField = new TextField() {
+            X = Pos.Right(GameNameLabel), Y = Pos.Top(GameNameLabel), Width = Dim.Fill(), Text = ""
         };
 
-        PlayerNameField = new TextField("") {
-            X = Pos.Right(PlayerNameLabel), Y = Pos.Top(PlayerNameLabel), Width = Dim.Fill()
+        PlayerNameField = new TextField() {
+            X = Pos.Right(PlayerNameLabel), Y = Pos.Top(PlayerNameLabel), Width = Dim.Fill(), Text = ""
         };
 
-        CompanyNameField = new TextField("") {
-            X = Pos.Right(CompanyNameLabel), Y = Pos.Top(CompanyNameLabel), Width = Dim.Fill()
+        CompanyNameField = new TextField() {
+            X = Pos.Right(CompanyNameLabel), Y = Pos.Top(CompanyNameLabel), Width = Dim.Fill(), Text = ""
         };
 
-        RoundsField = new TextField("") {
-            X = Pos.Right(RoundsLabel), Y = Pos.Top(RoundsLabel), Width = Dim.Fill()
+        RoundsField = new TextField() {
+            X = Pos.Right(RoundsLabel), Y = Pos.Top(RoundsLabel), Width = Dim.Fill(), Text = ""
         };
 
         ButtonsView = new View() {
@@ -210,13 +216,13 @@ public class CreateGameForm
             Text = "Return", IsDefault = false, X = Pos.Right(SubmitButton) + 1
         };
 
-        SubmitButton.Clicked += OnSubmit;
-        ReturnButton.Clicked += OnReturn;
+        SubmitButton.Accept += OnSubmit;
+        ReturnButton.Accept += OnReturn;
 
         ButtonsView.Add(SubmitButton, ReturnButton);
 
-        SubmitButton.GetCurrentWidth(out var submitButtonWidth);
-        ReturnButton.GetCurrentWidth(out var returnButtonWidth);
+        var submitButtonWidth = SubmitButton.Width;
+        var returnButtonWidth = ReturnButton.Width;
 
         ButtonsView.Width = submitButtonWidth + returnButtonWidth + 1;
 
