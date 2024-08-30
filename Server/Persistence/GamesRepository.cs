@@ -33,6 +33,15 @@ public class GamesRepository(WssDbContext context) : IGamesRepository
             .FirstOrDefaultAsync(g => g.Id == gameId);
     }
 
+    public async Task<Game?> GetForOverviewById(int gameId)
+    {
+        return await context.Games
+            .Include(g => g.Players).ThenInclude(p => p.Company).ThenInclude(c => c.Employees).ThenInclude(e => e.Skills)
+            .Include(g => g.Consultants).ThenInclude(c => c.Skills)
+            .Include(g => g.RoundsCollection)
+            .FirstOrDefaultAsync(g => g.Id == gameId);
+    }
+
     public async Task<Game?> GetByPlayerId(int playerId)
     {
         return await context.Games

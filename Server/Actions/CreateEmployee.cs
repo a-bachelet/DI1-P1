@@ -60,7 +60,7 @@ public class CreateEmployee(
             salaries = salaries.Append(salary);
         }
 
-        var randomSalary = rnd.Next(salaries.Count() + 1);
+        var randomSalary = salaries.ToList()[rnd.Next(salaries.Count() - 1)];
 
         var employee = new Employee(employeeName, company!.Id!.Value, company!.Player.GameId, randomSalary);
 
@@ -68,12 +68,12 @@ public class CreateEmployee(
 
         foreach (var randomSkill in randomSkills)
         {
-            employee.Skills.Add(new EmployeeSkill(randomSkill.Name, rnd.Next(11)));
+            employee.Skills.Add(new LeveledSkill(randomSkill.Name, rnd.Next(11)));
         }
 
         await employeesRepository.SaveEmployee(employee);
 
-        await gameHubService.UpdateCurrentGame(game: company.Player.Game);
+        await gameHubService.UpdateCurrentGame(gameId: company.Player.GameId);
 
         return Result.Ok(employee);
     }

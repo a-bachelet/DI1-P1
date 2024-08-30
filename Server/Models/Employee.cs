@@ -1,3 +1,5 @@
+using Server.Hubs.Records;
+
 namespace Server.Models;
 
 public class Employee(string name, int companyId, int gameId, int salary) : Consultant(name, salary, gameId)
@@ -6,7 +8,13 @@ public class Employee(string name, int companyId, int gameId, int salary) : Cons
 
     public Company Company { get; set; } = null!;
 
-    public new ICollection<EmployeeSkill> Skills { get; } = [];
-
     public int Salary { get; set; } = salary;
+
+    public new EmployeeOverview ToOverview()
+    {
+        return new EmployeeOverview(
+            Id is null ? 0 : (int) Id, Name, SalaryRequirement,
+            Salary, Skills.Select(s => s.ToOverview()).ToList()
+        );
+    }
 }

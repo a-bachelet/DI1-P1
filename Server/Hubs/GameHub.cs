@@ -21,7 +21,7 @@ public class GameHub(IGameHubService gameHubService, IGamesRepository gamesRepos
 
         await Groups.AddToGroupAsync(Context.ConnectionId, $"{game.Id}__{game.Name}");
 
-        await gameHubService.UpdateCurrentGame(Clients.Caller, game: game);
+        await gameHubService.UpdateCurrentGame(Clients.Caller, gameId: int.Parse((string) gameId));
 
         await base.OnConnectedAsync();
     }
@@ -33,14 +33,11 @@ public class GameHubService(IHubContext<GameHub, IGameHubClient> gameHubContext,
     {
         if (game is null && gameId is null) { return; }
 
-        game ??= await gamesRepository.GetById((int) gameId!);
+        game ??= await gamesRepository.GetForOverviewById((int) gameId!);
 
-        var data = new GameOverview(
-            (int) game!.Id!, game.Name,
-            game.Players.Select(p => new PlayerOverview((int) p.Id!, p.Name)).ToList(),
-            game.Players.Count,
-            3
-        );
+        if (game is null) { return; }
+
+        var data = game.ToOverview();
 
         caller ??= gameHubContext.Clients.Group($"{game.Id}__{game.Name}");
 

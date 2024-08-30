@@ -1,3 +1,5 @@
+using Server.Hubs.Records;
+
 namespace Server.Models;
 
 public enum GameStatus
@@ -38,5 +40,14 @@ public class Game(string name, int rounds = 15)
         return
             Status == GameStatus.InProgress &&
             RoundsCollection.Count < Rounds;
+    }
+
+    public GameOverview ToOverview()
+    {
+        return new GameOverview(
+            Id is null ? 0 : (int) Id, Name, Players.Select(p => p.ToOverview()).ToList(),
+            Players.Count, 3, Rounds, RoundsCollection.Count,
+            Status.ToString(), Consultants.Select(c => c.ToOverview()).ToList()
+        );
     }
 }

@@ -1,3 +1,5 @@
+using Server.Hubs.Records;
+
 namespace Server.Models;
 
 public class Player(string name, int gameId)
@@ -13,4 +15,12 @@ public class Player(string name, int gameId)
     public int? CompanyId { get; set; }
 
     public Company Company { get; set; } = null!;
+
+    public PlayerOverview ToOverview()
+    {
+        return new PlayerOverview(
+            Id is null ? 0 : (int) Id, Name,
+            Company.ToOverview()
+        );
+    }
 }

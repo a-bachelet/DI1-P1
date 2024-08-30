@@ -37,7 +37,7 @@ public class MainWindow : Window
             new Terminal.Gui.Attribute(Color.Blue, Color.Black),
             new Terminal.Gui.Attribute(Color.Black, Color.White),
             new Terminal.Gui.Attribute(Color.Black, Color.White),
-            new Terminal.Gui.Attribute(Color.Gray, Color.White),
+            new Terminal.Gui.Attribute(Color.Blue, Color.Black),
             new Terminal.Gui.Attribute(Color.Black, Color.White)
         );
     }

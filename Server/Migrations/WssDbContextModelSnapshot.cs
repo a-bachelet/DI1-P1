@@ -309,7 +309,7 @@ namespace Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Server.Models.ConsultantSkill", "Skills", b1 =>
+                    b.OwnsMany("Server.Models.Consultant.Skills#Server.Models.ConsultantSkill", "Skills", b1 =>
                         {
                             b1.Property<int>("ConsultantId")
                                 .HasColumnType("integer");
@@ -327,7 +327,7 @@ namespace Server.Migrations
 
                             b1.HasKey("ConsultantId", "Id");
 
-                            b1.ToTable("consultants");
+                            b1.ToTable("consultants", (string)null);
 
                             b1.ToJson("Skills");
 
@@ -359,7 +359,7 @@ namespace Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Server.Models.RoundAction", "Actions", b1 =>
+                    b.OwnsMany("Server.Models.Round.Actions#Server.Models.RoundAction", "Actions", b1 =>
                         {
                             b1.Property<int>("RoundId")
                                 .HasColumnType("integer");
@@ -373,7 +373,7 @@ namespace Server.Migrations
 
                             b1.HasKey("RoundId", "Id");
 
-                            b1.ToTable("rounds");
+                            b1.ToTable("rounds", (string)null);
 
                             b1.ToJson("Actions");
 

@@ -66,7 +66,7 @@ public class CreateConsultant(
 
         await consultantsRepository.SaveConsultant(consultant);
 
-        await gameHubService.UpdateCurrentGame(game: game);
+        await gameHubService.UpdateCurrentGame(gameId: gameId);
 
         return Result.Ok(consultant);
     }

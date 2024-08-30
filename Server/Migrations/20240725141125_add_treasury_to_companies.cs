@@ -19,9 +19,9 @@ namespace Server.Migrations
                 table: "employees",
                 type: "jsonb",
                 nullable: true,
-                oldClrType: typeof(ICollection<EmployeeSkill>),
+                oldClrType: typeof(ICollection<LeveledSkill>),
                 oldType: "jsonb",
-                oldDefaultValue: new EmployeeSkill[0]);
+                oldDefaultValue: new LeveledSkill[0]);
 
             migrationBuilder.AddColumn<int>(
                 name: "Treasury",
@@ -38,12 +38,12 @@ namespace Server.Migrations
                 name: "Treasury",
                 table: "companies");
 
-            migrationBuilder.AlterColumn<ICollection<EmployeeSkill>>(
+            migrationBuilder.AlterColumn<ICollection<LeveledSkill>>(
                 name: "Skills",
                 table: "employees",
                 type: "jsonb",
                 nullable: false,
-                defaultValue: new EmployeeSkill[0],
+                defaultValue: new LeveledSkill[0],
                 oldClrType: typeof(string),
                 oldType: "jsonb",
                 oldNullable: true);

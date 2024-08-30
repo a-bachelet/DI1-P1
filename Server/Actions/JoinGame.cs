@@ -28,7 +28,7 @@ public class JoinGame(
         if (createPlayerActionResult.IsSuccess)
         {
             var player = createPlayerActionResult.Value;
-            await gameHubService.UpdateCurrentGame(game: player.Game);
+            await gameHubService.UpdateCurrentGame(gameId: player.GameId);
         }
 
         return createPlayerActionResult;

@@ -2,14 +2,11 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Net.Http.Json;
-using System.Text.Json;
 
 using Client.Records;
 
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
-
-using Spectre.Console;
 
 using Terminal.Gui;
 

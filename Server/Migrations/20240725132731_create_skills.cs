@@ -18,12 +18,12 @@ namespace Server.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<ICollection<EmployeeSkill>>(
+            migrationBuilder.AddColumn<ICollection<LeveledSkill>>(
                 name: "Skills",
                 table: "employees",
                 type: "jsonb",
                 nullable: false,
-                defaultValue: new EmployeeSkill[0]);
+                defaultValue: new LeveledSkill[0]);
 
             migrationBuilder.CreateTable(
                 name: "skills",

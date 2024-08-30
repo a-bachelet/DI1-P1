@@ -72,7 +72,7 @@ public class CreatePlayer(
             return Result.Fail(createCompanyResult.Errors);
         }
 
-        await gameHubService.UpdateCurrentGame(game: game);
+        await gameHubService.UpdateCurrentGame(gameId: gameId);
 
         return Result.Ok(player);
     }

@@ -88,7 +88,7 @@ public class ActInRound(
             }
         }
 
-        await gameHubService.UpdateCurrentGame(game: round.Game);
+        await gameHubService.UpdateCurrentGame(gameId: round.GameId);
 
         return Result.Ok(round);
     }

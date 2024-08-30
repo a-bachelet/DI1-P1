@@ -83,7 +83,7 @@ public class FinishRound(
             var startRoundActionResult = await startRoundAction.PerformAsync(startRoundActionParams);
             var newRound = startRoundActionResult.Value;
 
-            await gameHubService.UpdateCurrentGame(game: round.Game);
+            await gameHubService.UpdateCurrentGame(gameId: round.GameId);
 
             return Result.Ok(newRound);
         }
@@ -97,7 +97,7 @@ public class FinishRound(
                 return Result.Fail(finishGameActionResult.Errors);
             }
 
-            await gameHubService.UpdateCurrentGame(game: round.Game);
+            await gameHubService.UpdateCurrentGame(gameId: round.GameId);
 
             return Result.Ok(round);
         }

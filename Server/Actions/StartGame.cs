@@ -64,7 +64,7 @@ public class StartGame(
         }
 
         await mainHubService.UpdateJoinableGamesList();
-        await gameHubService.UpdateCurrentGame(game: game);
+        await gameHubService.UpdateCurrentGame(gameId: gameId);
 
         return Result.Ok(game);
     }

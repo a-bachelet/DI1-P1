@@ -77,7 +77,7 @@ public class CreateCompany(
             }
         }
 
-        await gameHubService.UpdateCurrentGame(game: player.Game);
+        await gameHubService.UpdateCurrentGame(gameId: player.GameId);
 
         return Result.Ok(company);
     }

@@ -2,8 +2,6 @@ using System.ComponentModel;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-using Spectre.Console;
-
 using Terminal.Gui;
 
 namespace Client.Screens;
@@ -118,15 +116,8 @@ public class CreateGameScreen(Window target)
         }
         else
         {
-            try {
-                var content = await response.Content.ReadFromJsonAsync<JsonElement>();
-                GameId = content.GetProperty("id").GetInt32();
-            }
-            catch(Exception e) {
-                AnsiConsole.Clear();
-                AnsiConsole.Write(new Markup("[red]Error: An error occured[/]\n"));
-                AnsiConsole.WriteException(e);
-            }
+            var content = await response.Content.ReadFromJsonAsync<JsonElement>();
+            GameId = content.GetProperty("id").GetInt32();
         }
     }
 }

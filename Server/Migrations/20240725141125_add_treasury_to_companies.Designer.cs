@@ -264,7 +264,7 @@ namespace Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Server.Models.EmployeeSkill", "Skills", b1 =>
+                    b.OwnsMany("Server.Models.LeveledSkill", "Skills", b1 =>
                         {
                             b1.Property<int>("EmployeeId")
                                 .HasColumnType("integer");

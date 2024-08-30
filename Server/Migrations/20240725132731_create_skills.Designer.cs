@@ -65,11 +65,11 @@ namespace Server.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.Property<ICollection<EmployeeSkill>>("Skills")
+                    b.Property<ICollection<LeveledSkill>>("Skills")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
-                        .HasDefaultValue(new EmployeeSkill[0]);
+                        .HasDefaultValue(new LeveledSkill[0]);
 
                     b.HasKey("Id");
 
