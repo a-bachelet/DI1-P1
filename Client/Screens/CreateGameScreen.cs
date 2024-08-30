@@ -22,20 +22,23 @@ public class CreateGameScreen(Window target)
         await BeforeShow();
         await DisplayForm();
 
-        if (Returned) {
+        if (Returned)
+        {
             await Return();
             return;
         }
 
         await CreateGame();
 
-        if (Errored) {
+        if (Errored)
+        {
             Submitted = false;
             Returned = false;
 
             await DisplayForm(true);
 
-            if (Returned) {
+            if (Returned)
+            {
                 await Return();
                 return;
             }
@@ -72,7 +75,8 @@ public class CreateGameScreen(Window target)
 
         Target.Add(Form.FormView);
 
-        while (!Returned && !Submitted) {
+        while (!Returned && !Submitted)
+        {
             await Task.Delay(100);
         }
     }
@@ -81,23 +85,30 @@ public class CreateGameScreen(Window target)
     {
         Target.Remove(Form.FormView);
 
-        var loadingDialog = new Dialog() {
-            Width = 18, Height = 3
+        var loadingDialog = new Dialog()
+        {
+            Width = 18,
+            Height = 3
         };
 
-        var loadingText = new Label() {
-            Text = "Creating game...", X = Pos.Center(), Y = Pos.Center()
+        var loadingText = new Label()
+        {
+            Text = "Creating game...",
+            X = Pos.Center(),
+            Y = Pos.Center()
         };
 
         loadingDialog.Add(loadingText);
 
         Target.Add(loadingDialog);
 
-        var httpHandler = new HttpClientHandler {
+        var httpHandler = new HttpClientHandler
+        {
             ServerCertificateCustomValidationCallback = (_, __, ___, ____) => true
         };
 
-        var httpClient = new HttpClient(httpHandler) {
+        var httpClient = new HttpClient(httpHandler)
+        {
             BaseAddress = new Uri("https://localhost:7032"),
         };
 
@@ -106,7 +117,7 @@ public class CreateGameScreen(Window target)
         var companyName = Form.CompanyNameField.Text.ToString();
         var rounds = int.Parse(Form.RoundsField.Text.ToString()!);
 
-        var requestBody = new {gameName, playerName, companyName, rounds};
+        var requestBody = new { gameName, playerName, companyName, rounds };
         var request = httpClient.PostAsJsonAsync("/games", requestBody);
         var response = await request;
 
@@ -124,8 +135,8 @@ public class CreateGameScreen(Window target)
 
 public class CreateGameForm
 {
-    private EventHandler<HandledEventArgs> _onSubmit = (_, __) => {};
-    private EventHandler<HandledEventArgs> _onReturn = (_, __) => {};
+    private EventHandler<HandledEventArgs> _onSubmit = (_, __) => { };
+    private EventHandler<HandledEventArgs> _onReturn = (_, __) => { };
 
     public EventHandler<HandledEventArgs> OnSubmit
     {
@@ -163,48 +174,89 @@ public class CreateGameForm
 
     public CreateGameForm()
     {
-        GameNameLabel = new Label() {
-            X = 0, Y = 0, Width = 20, Text = "Game name :"
+        GameNameLabel = new Label()
+        {
+            X = 0,
+            Y = 0,
+            Width = 20,
+            Text = "Game name :"
         };
 
-        PlayerNameLabel = new Label() {
-            X = Pos.Left(GameNameLabel), Y = Pos.Bottom(GameNameLabel) + 1, Width = 20, Text = "Player name :"
+        PlayerNameLabel = new Label()
+        {
+            X = Pos.Left(GameNameLabel),
+            Y = Pos.Bottom(GameNameLabel) + 1,
+            Width = 20,
+            Text = "Player name :"
         };
 
-        CompanyNameLabel = new Label() {
-            X = Pos.Left(PlayerNameLabel), Y = Pos.Bottom(PlayerNameLabel) + 1, Width = 20, Text = "Company name :"
+        CompanyNameLabel = new Label()
+        {
+            X = Pos.Left(PlayerNameLabel),
+            Y = Pos.Bottom(PlayerNameLabel) + 1,
+            Width = 20,
+            Text = "Company name :"
         };
 
-        RoundsLabel = new Label() {
-            X = Pos.Left(CompanyNameLabel), Y = Pos.Bottom(CompanyNameLabel) + 1, Width = 20, Text = "Rounds (15 - 100) :"
+        RoundsLabel = new Label()
+        {
+            X = Pos.Left(CompanyNameLabel),
+            Y = Pos.Bottom(CompanyNameLabel) + 1,
+            Width = 20,
+            Text = "Rounds (15 - 100) :"
         };
 
-        GameNameField = new TextField() {
-            X = Pos.Right(GameNameLabel), Y = Pos.Top(GameNameLabel), Width = Dim.Fill(), Text = ""
+        GameNameField = new TextField()
+        {
+            X = Pos.Right(GameNameLabel),
+            Y = Pos.Top(GameNameLabel),
+            Width = Dim.Fill(),
+            Text = ""
         };
 
-        PlayerNameField = new TextField() {
-            X = Pos.Right(PlayerNameLabel), Y = Pos.Top(PlayerNameLabel), Width = Dim.Fill(), Text = ""
+        PlayerNameField = new TextField()
+        {
+            X = Pos.Right(PlayerNameLabel),
+            Y = Pos.Top(PlayerNameLabel),
+            Width = Dim.Fill(),
+            Text = ""
         };
 
-        CompanyNameField = new TextField() {
-            X = Pos.Right(CompanyNameLabel), Y = Pos.Top(CompanyNameLabel), Width = Dim.Fill(), Text = ""
+        CompanyNameField = new TextField()
+        {
+            X = Pos.Right(CompanyNameLabel),
+            Y = Pos.Top(CompanyNameLabel),
+            Width = Dim.Fill(),
+            Text = ""
         };
 
-        RoundsField = new TextField() {
-            X = Pos.Right(RoundsLabel), Y = Pos.Top(RoundsLabel), Width = Dim.Fill(), Text = ""
+        RoundsField = new TextField()
+        {
+            X = Pos.Right(RoundsLabel),
+            Y = Pos.Top(RoundsLabel),
+            Width = Dim.Fill(),
+            Text = ""
         };
 
-        ButtonsView = new View() {
-            Width = 1, Height = 1, X = Pos.Center(), Y = Pos.Bottom(RoundsLabel) + 1
+        ButtonsView = new View()
+        {
+            Width = 1,
+            Height = 1,
+            X = Pos.Center(),
+            Y = Pos.Bottom(RoundsLabel) + 1
         };
 
-        SubmitButton = new Button() {
-            Text = "Submit", IsDefault = true
+        SubmitButton = new Button()
+        {
+            Text = "Submit",
+            IsDefault = true
         };
 
-        ReturnButton = new Button() {
-            Text = "Return", IsDefault = false, X = Pos.Right(SubmitButton) + 1
+        ReturnButton = new Button()
+        {
+            Text = "Return",
+            IsDefault = false,
+            X = Pos.Right(SubmitButton) + 1
         };
 
         SubmitButton.Accept += OnSubmit;
@@ -217,8 +269,10 @@ public class CreateGameForm
 
         ButtonsView.Width = submitButtonWidth + returnButtonWidth + 1;
 
-        FormView = new View() {
-            Width = Dim.Fill(), Height = Dim.Fill()
+        FormView = new View()
+        {
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
         };
 
         FormView.Add(

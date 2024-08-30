@@ -9,7 +9,8 @@ public class Program
     static void Main()
     {
         Application.Init();
-        Application.Invoke(async () => {
+        Application.Invoke(async () =>
+        {
             var mainWindow = (MainWindow) Application.Top;
 
             var titleScreen = new TitleScreen(mainWindow);

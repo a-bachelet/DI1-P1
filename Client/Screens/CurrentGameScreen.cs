@@ -65,7 +65,8 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
             .AddJsonProtocol()
             .Build();
 
-        hubConnection.On<GameOverview>("CurrentGameUpdated", async data => {
+        hubConnection.On<GameOverview>("CurrentGameUpdated", async data =>
+        {
             CurrentGame = data;
             ReloadWindowTitle();
             if (CurrentView is not null) { await CurrentView.Refresh(CurrentGame); };
@@ -74,12 +75,17 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
 
         await hubConnection.StartAsync();
 
-        var loadingDialog = new Dialog() {
-            Width = 17, Height = 3
+        var loadingDialog = new Dialog()
+        {
+            Width = 17,
+            Height = 3
         };
 
-        var loadingText = new Label() {
-            Text = "Loading game...", X = Pos.Center(), Y = Pos.Center()
+        var loadingText = new Label()
+        {
+            Text = "Loading game...",
+            X = Pos.Center(),
+            Y = Pos.Center()
         };
 
         loadingDialog.Add(loadingText);
@@ -144,7 +150,7 @@ public class CurrentGameMainView : CurrentGameView
     private readonly FrameView Status = new();
     private readonly Button StartButton = new() { Text = "Start Game" };
 
-    public EventHandler<HandledEventArgs> OnStart = (_, __) => {};
+    public EventHandler<HandledEventArgs> OnStart = (_, __) => { };
 
     public CurrentGameMainView(GameOverview game, string playerName)
     {
@@ -204,8 +210,10 @@ public class CurrentGameMainView : CurrentGameView
 
         var dataTableSource = new DataTableSource(dataTable);
 
-        var tableView = new TableView() {
-            X = Pos.Center(), Y= Pos.Center(),
+        var tableView = new TableView()
+        {
+            X = Pos.Center(),
+            Y = Pos.Center(),
             Width = Game.Players.Max(p => p.Name.Length)
                 + Game.Players.Max(p => p.Company.Name.Length)
                 + Game.Players.Max(p => p.Company.Treasury.ToString().Length)
@@ -214,7 +222,8 @@ public class CurrentGameMainView : CurrentGameView
                 + 6,
             Height = Dim.Fill(),
             Table = dataTableSource,
-            Style = new TableStyle {
+            Style = new TableStyle
+            {
                 ShowHorizontalBottomline = true,
                 ExpandLastColumn = false,
             }
@@ -256,27 +265,34 @@ public class CurrentGameMainView : CurrentGameView
     {
         RemoveAll();
 
-        var loadingDialog = new Dialog() {
-            Width = 18, Height = 3
+        var loadingDialog = new Dialog()
+        {
+            Width = 18,
+            Height = 3
         };
 
-        var loadingText = new Label() {
-            Text = "Starting game...", X = Pos.Center(), Y = Pos.Center()
+        var loadingText = new Label()
+        {
+            Text = "Starting game...",
+            X = Pos.Center(),
+            Y = Pos.Center()
         };
 
         loadingDialog.Add(loadingText);
 
         Add(loadingDialog);
 
-        var httpHandler = new HttpClientHandler {
+        var httpHandler = new HttpClientHandler
+        {
             ServerCertificateCustomValidationCallback = (_, __, ___, ____) => true
         };
 
-        var httpClient = new HttpClient(httpHandler) {
+        var httpClient = new HttpClient(httpHandler)
+        {
             BaseAddress = new Uri("https://localhost:7032"),
         };
 
-        var request = httpClient.PostAsJsonAsync($"/games/{Game.Id}/start", new {});
+        var request = httpClient.PostAsJsonAsync($"/games/{Game.Id}/start", new { });
         var response = await request;
 
         if (!response.IsSuccessStatusCode)
@@ -389,10 +405,16 @@ public class CurrentGameCompanyView : CurrentGameView
         Employees.Y = Pos.Bottom(Player);
         Actions.Y = Pos.Top(Employees);
 
-        var employeesTree = new TreeView() {
-            X = 0, Y = 0, Width = Dim.Fill(), Height = Dim.Fill(), BorderStyle = LineStyle.Dotted
+        var employeesTree = new TreeView()
+        {
+            X = 0,
+            Y = 0,
+            Width = Dim.Fill(),
+            Height = Dim.Fill(),
+            BorderStyle = LineStyle.Dotted
         };
-        var employeesData = CurrentPlayer.Company.Employees.Select(e => {
+        var employeesData = CurrentPlayer.Company.Employees.Select(e =>
+        {
             var node = new TreeNode($"{e.Name} | {e.Salary} $");
             e.Skills.ToList().ForEach(s => node.Children.Add(
                 new TreeNode($"{s.Name} | {s.Level}")

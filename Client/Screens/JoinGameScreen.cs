@@ -39,14 +39,16 @@ public class JoinGameScreen(Window target)
         await LoadGames();
         await SelectGame();
 
-        if (ListReturned) {
+        if (ListReturned)
+        {
             await Return();
             return;
         }
 
         await DisplayForm();
 
-        if (FormReturned) {
+        if (FormReturned)
+        {
             await SelectGame();
             return;
         }
@@ -60,7 +62,8 @@ public class JoinGameScreen(Window target)
 
             await DisplayForm(true);
 
-            if (FormReturned) {
+            if (FormReturned)
+            {
                 await SelectGame();
                 return;
             }
@@ -112,19 +115,25 @@ public class JoinGameScreen(Window target)
             .AddJsonProtocol()
             .Build();
 
-        hubConnection.On<ICollection<JoinableGame>>("JoinableGamesListUpdated", data => {
+        hubConnection.On<ICollection<JoinableGame>>("JoinableGamesListUpdated", data =>
+        {
             JoinableGames = data;
             Loading = false;
         });
 
         await hubConnection.StartAsync();
 
-        var loadingDialog = new Dialog() {
-            Width = 18, Height = 3
+        var loadingDialog = new Dialog()
+        {
+            Width = 18,
+            Height = 3
         };
 
-        var loadingText = new Label() {
-            Text = "Loading games...", X = Pos.Center(), Y = Pos.Center()
+        var loadingText = new Label()
+        {
+            Text = "Loading games...",
+            X = Pos.Center(),
+            Y = Pos.Center()
         };
 
         loadingDialog.Add(loadingText);
@@ -169,7 +178,8 @@ public class JoinGameScreen(Window target)
 
         Target.Add(Form.FormView);
 
-        while (!FormReturned && !FormSubmitted) {
+        while (!FormReturned && !FormSubmitted)
+        {
             await Task.Delay(100);
         }
     }
@@ -178,30 +188,37 @@ public class JoinGameScreen(Window target)
     {
         Target.Remove(Form.FormView);
 
-        var loadingDialog = new Dialog() {
-            Width = 17, Height = 3
+        var loadingDialog = new Dialog()
+        {
+            Width = 17,
+            Height = 3
         };
 
-        var loadingText = new Label() {
-            Text = "Joining game...", X = Pos.Center(), Y = Pos.Center()
+        var loadingText = new Label()
+        {
+            Text = "Joining game...",
+            X = Pos.Center(),
+            Y = Pos.Center()
         };
 
         loadingDialog.Add(loadingText);
 
         Target.Add(loadingDialog);
 
-        var httpHandler = new HttpClientHandler {
+        var httpHandler = new HttpClientHandler
+        {
             ServerCertificateCustomValidationCallback = (_, __, ___, ____) => true
         };
 
-        var httpClient = new HttpClient(httpHandler) {
+        var httpClient = new HttpClient(httpHandler)
+        {
             BaseAddress = new Uri("https://localhost:7032"),
         };
 
         var playerName = Form.PlayerNameField.Text.ToString();
         var companyName = Form.CompanyNameField.Text.ToString();
 
-        var requestBody = new {playerName, companyName};
+        var requestBody = new { playerName, companyName };
         var request = httpClient.PostAsJsonAsync($"/games/{GameId}/join", requestBody);
         var response = await request;
 
@@ -218,7 +235,7 @@ public class JoinGameChoiceListDataSource : List<JoinableGame>, IListDataSource
 
     public bool SuspendCollectionChangedEvent { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-    public event NotifyCollectionChangedEventHandler CollectionChanged = (_, __) => {};
+    public event NotifyCollectionChangedEventHandler CollectionChanged = (_, __) => { };
 
     public void Dispose()
     {
@@ -236,7 +253,7 @@ public class JoinGameChoiceListDataSource : List<JoinableGame>, IListDataSource
         driver.AddStr($"{game.Name} ({game.PlayersCount}/{game.MaximumPlayersCount})");
     }
 
-    public void SetMark(int item, bool value) {}
+    public void SetMark(int item, bool value) { }
 
     public IList ToList()
     {
@@ -246,8 +263,8 @@ public class JoinGameChoiceListDataSource : List<JoinableGame>, IListDataSource
 
 public class JoinGameForm
 {
-    private EventHandler<HandledEventArgs> _onSubmit = (_, __) => {};
-    private EventHandler<HandledEventArgs> _onReturn = (_, __) => {};
+    private EventHandler<HandledEventArgs> _onSubmit = (_, __) => { };
+    private EventHandler<HandledEventArgs> _onReturn = (_, __) => { };
 
     public EventHandler<HandledEventArgs> OnSubmit
     {
@@ -281,32 +298,57 @@ public class JoinGameForm
 
     public JoinGameForm()
     {
-        PlayerNameLabel = new Label() {
-            X = 0, Y = 0, Width = 20, Text = "Player name :"
+        PlayerNameLabel = new Label()
+        {
+            X = 0,
+            Y = 0,
+            Width = 20,
+            Text = "Player name :"
         };
 
-        CompanyNameLabel = new Label() {
-            X = Pos.Left(PlayerNameLabel), Y = Pos.Bottom(PlayerNameLabel) + 1, Width = 20, Text = "Company name :"
+        CompanyNameLabel = new Label()
+        {
+            X = Pos.Left(PlayerNameLabel),
+            Y = Pos.Bottom(PlayerNameLabel) + 1,
+            Width = 20,
+            Text = "Company name :"
         };
 
-        PlayerNameField = new TextField() {
-            X = Pos.Right(PlayerNameLabel), Y = Pos.Top(PlayerNameLabel), Width = Dim.Fill(), Text = ""
+        PlayerNameField = new TextField()
+        {
+            X = Pos.Right(PlayerNameLabel),
+            Y = Pos.Top(PlayerNameLabel),
+            Width = Dim.Fill(),
+            Text = ""
         };
 
-        CompanyNameField = new TextField() {
-            X = Pos.Right(CompanyNameLabel), Y = Pos.Top(CompanyNameLabel), Width = Dim.Fill(), Text = ""
+        CompanyNameField = new TextField()
+        {
+            X = Pos.Right(CompanyNameLabel),
+            Y = Pos.Top(CompanyNameLabel),
+            Width = Dim.Fill(),
+            Text = ""
         };
 
-        ButtonsView = new View() {
-            Width = 1, Height = 1, X = Pos.Center(), Y = Pos.Bottom(CompanyNameLabel) + 1
+        ButtonsView = new View()
+        {
+            Width = 1,
+            Height = 1,
+            X = Pos.Center(),
+            Y = Pos.Bottom(CompanyNameLabel) + 1
         };
 
-        SubmitButton = new Button() {
-            Text = "Submit", IsDefault = true
+        SubmitButton = new Button()
+        {
+            Text = "Submit",
+            IsDefault = true
         };
 
-        ReturnButton = new Button() {
-            Text = "Return", IsDefault = false, X = Pos.Right(SubmitButton) + 1
+        ReturnButton = new Button()
+        {
+            Text = "Return",
+            IsDefault = false,
+            X = Pos.Right(SubmitButton) + 1
         };
 
         SubmitButton.Accept += OnSubmit;
@@ -319,8 +361,10 @@ public class JoinGameForm
 
         ButtonsView.Width = submitButtonWidth + returnButtonWidth + 1;
 
-        FormView = new View() {
-            Width = Dim.Fill(), Height = Dim.Fill()
+        FormView = new View()
+        {
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
         };
 
         FormView.Add(

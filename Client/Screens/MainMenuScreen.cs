@@ -17,7 +17,8 @@ public class MainMenuScreen(Window target)
         await BeforeShow();
         await SelectAction();
 
-        var next = Action switch {
+        var next = Action switch
+        {
             MainMenuActionList.Action.CREATE_GAME => new CreateGameScreen(Target).Show(),
             MainMenuActionList.Action.JOIN_GAME => new JoinGameScreen(Target).Show(),
             MainMenuActionList.Action.QUIT => Task.Run(() => Application.RequestStop()),
@@ -53,7 +54,8 @@ public class MainMenuScreen(Window target)
 
 public class MainMenuActionList : ListView
 {
-    public enum Action {
+    public enum Action
+    {
         CREATE_GAME,
         JOIN_GAME,
         QUIT
@@ -77,7 +79,7 @@ public class MainMenuActionListDataSource : List<MainMenuActionList.Action>, ILi
 
     public bool SuspendCollectionChangedEvent { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-    public event NotifyCollectionChangedEventHandler CollectionChanged  = (_, __) => {};
+    public event NotifyCollectionChangedEventHandler CollectionChanged = (_, __) => { };
 
     public void Dispose()
     {
@@ -91,7 +93,8 @@ public class MainMenuActionListDataSource : List<MainMenuActionList.Action>, ILi
 
     public void Render(ListView container, ConsoleDriver driver, bool selected, int item, int col, int line, int width, int start = 0)
     {
-        switch (item) {
+        switch (item)
+        {
             case (int) MainMenuActionList.Action.CREATE_GAME:
                 driver.AddStr("Create a game");
                 break;
@@ -104,7 +107,7 @@ public class MainMenuActionListDataSource : List<MainMenuActionList.Action>, ILi
         }
     }
 
-    public void SetMark(int item, bool value) {}
+    public void SetMark(int item, bool value) { }
 
     public IList ToList()
     {
