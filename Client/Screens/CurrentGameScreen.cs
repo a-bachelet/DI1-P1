@@ -312,11 +312,19 @@ public class CurrentGameCompanyView : CurrentGameView
     private PlayerOverview CurrentPlayer;
     private readonly string PlayerName;
 
+    private readonly View Header = new();
+    private readonly View Body = new();
+    private readonly View LeftBody = new();
+    private readonly View RightBody = new();
+
+
     private readonly FrameView Player = new();
     private readonly FrameView Company = new();
     private readonly FrameView Treasury = new();
     private readonly FrameView Rounds = new();
     private readonly FrameView Employees = new();
+    private readonly FrameView Consultants = new();
+    private readonly FrameView CallForTenders = new();
     private readonly FrameView Actions = new();
 
     public CurrentGameCompanyView(GameOverview game, string playerName)
@@ -337,12 +345,8 @@ public class CurrentGameCompanyView : CurrentGameView
         Game = game;
         CurrentPlayer = Game.Players.First(p => p.Name == PlayerName);
 
-        Remove(Player);
-        Remove(Company);
-        Remove(Treasury);
-        Remove(Rounds);
-        Remove(Employees);
-        Remove(Actions);
+        RemoveHeader();
+        RemoveBody();
 
         SetupHeader();
         SetupBody();
@@ -352,58 +356,110 @@ public class CurrentGameCompanyView : CurrentGameView
 
     private void SetupHeader()
     {
-        Player.Title = "Player";
-        Company.Title = "Company";
-        Treasury.Title = "Treasury";
-        Rounds.Title = "Rounds";
+        Header.X = Header.Y = 0;
+        Header.Width = Dim.Fill();
+        Header.Height = Dim.Auto(DimAutoStyle.Content);
 
-        Player.Width = Dim.Percent(25);
-        Company.Width = Dim.Percent(25);
-        Treasury.Width = Dim.Percent(25);
-        Rounds.Width = Dim.Percent(25);
+        SetupPlayer();
+        SetupCompany();
+        SetupTreasury();
+        SetupRounds();
 
-        Player.Height = Dim.Auto(DimAutoStyle.Content);
-        Company.Height = Dim.Auto(DimAutoStyle.Content);
-        Treasury.Height = Dim.Auto(DimAutoStyle.Content);
-        Rounds.Height = Dim.Auto(DimAutoStyle.Content);
-
-        Player.X = 0;
-        Company.X = Pos.Right(Player);
-        Treasury.X = Pos.Right(Company);
-        Rounds.X = Pos.Right(Treasury);
-
-        Player.Y = 0;
-        Company.Y = 0;
-        Treasury.Y = 0;
-        Rounds.Y = 0;
-
-        Player.Add(new Label { Text = CurrentPlayer.Name });
-        Company.Add(new Label { Text = CurrentPlayer.Company.Name });
-        Treasury.Add(new Label { Text = $"{CurrentPlayer.Company.Treasury} $" });
-        Rounds.Add(new Label { Text = $"{Game.CurrentRound}/{Game.MaximumRounds}" });
-
-        Add(Player);
-        Add(Company);
-        Add(Treasury);
-        Add(Rounds);
+        Add(Header);
     }
 
     private void SetupBody()
     {
+        Body.X = Pos.Left(Header);
+        Body.Y = Pos.Bottom(Header) + 1;
+        Body.Width = Dim.Fill();
+        Body.Height = Dim.Fill();
+
+        SetupLeftBody();
+        SetupRightBody();
+
+        Add(Body);
+    }
+
+    private void SetupLeftBody()
+    {
+        LeftBody.X = LeftBody.Y = 0;
+        LeftBody.Width = Dim.Percent(80);
+        LeftBody.Height = Dim.Fill();
+
+        SetupEmployees();
+        SetupConsultants();
+        SetupCallForTenders();
+
+        Body.Add(LeftBody);
+    }
+
+    private void SetupRightBody()
+    {
+        RightBody.X = Pos.Right(LeftBody);
+        RightBody.Y = Pos.Top(LeftBody);
+        RightBody.Width = Dim.Percent(20);
+        RightBody.Height = Dim.Fill();
+
+        SetupActions();
+
+        Body.Add(RightBody);
+    }
+
+    private void SetupPlayer()
+    {
+        Player.Title = "Player";
+        Player.Width = Dim.Percent(25);
+        Player.Height = Dim.Auto(DimAutoStyle.Content);
+        Player.X = 0;
+        Player.Y = 0;
+        Player.Add(new Label { Text = CurrentPlayer.Name });
+
+        Header.Add(Player);
+    }
+
+    private void SetupCompany()
+    {
+        Company.Title = "Company";
+        Company.Width = Dim.Percent(25);
+        Company.Height = Dim.Auto(DimAutoStyle.Content);
+        Company.X = Pos.Right(Player);
+        Company.Y = 0;
+        Company.Add(new Label { Text = CurrentPlayer.Company.Name });
+
+        Header.Add(Company);
+    }
+
+    private void SetupTreasury()
+    {
+        Treasury.Title = "Treasury";
+        Treasury.Width = Dim.Percent(25);
+        Treasury.Height = Dim.Auto(DimAutoStyle.Content);
+        Treasury.X = Pos.Right(Company);
+        Treasury.Y = 0;
+        Treasury.Add(new Label { Text = $"{CurrentPlayer.Company.Treasury} $" });
+
+        Header.Add(Treasury);
+    }
+
+    private void SetupRounds()
+    {
+        Rounds.Title = "Rounds";
+        Rounds.Width = Dim.Percent(25);
+        Rounds.Height = Dim.Auto(DimAutoStyle.Content);
+        Rounds.X = Pos.Right(Treasury);
+        Rounds.Y = 0;
+        Rounds.Add(new Label { Text = $"{Game.CurrentRound}/{Game.MaximumRounds}" });
+
+        Header.Add(Rounds);
+    }
+
+    private void SetupEmployees()
+    {
         Employees.Title = "Employees";
-        Actions.Title = "Actions";
-
-        Employees.Width = Dim.Percent(80);
-        Actions.Width = Dim.Percent(20) - 2;
-
-        Employees.Height = Dim.Fill();
-        Actions.Height = Dim.Fill();
-
-        Employees.X = 0;
-        Actions.X = Pos.Right(Employees);
-
-        Employees.Y = Pos.Bottom(Player);
-        Actions.Y = Pos.Top(Employees);
+        Employees.X = Employees.Y = 0;
+        Employees.Width = Dim.Fill();
+        Employees.Height = Dim.Percent(33);
 
         var employeesTree = new TreeView()
         {
@@ -413,6 +469,7 @@ public class CurrentGameCompanyView : CurrentGameView
             Height = Dim.Fill(),
             BorderStyle = LineStyle.Dotted
         };
+
         var employeesData = CurrentPlayer.Company.Employees.Select(e =>
         {
             var node = new TreeNode($"{e.Name} | {e.Salary} $");
@@ -422,13 +479,45 @@ public class CurrentGameCompanyView : CurrentGameView
             return node;
         });
 
+        employeesTree.BorderStyle = LineStyle.None;
         employeesTree.AddObjects(employeesData);
+        employeesTree.ExpandAll();
 
         Employees.Add(employeesTree);
 
-        employeesTree.ExpandAll();
-
-        Add(Employees);
-        Add(Actions);
+        LeftBody.Add(Employees);
     }
+
+    private void SetupConsultants()
+    {
+        Consultants.Title = "Consultants";
+        Consultants.X = Pos.Left(Employees);
+        Consultants.Y = Pos.Bottom(Employees) + 1;
+        Consultants.Width = Dim.Fill();
+        Consultants.Height = Dim.Percent(33);
+
+        LeftBody.Add(Consultants);
+    }
+
+    private void SetupCallForTenders()
+    {
+        CallForTenders.Title = "Call For Tenders";
+        CallForTenders.X = Pos.Left(Consultants);
+        CallForTenders.Y = Pos.Bottom(Consultants) + 1;
+        CallForTenders.Width = Dim.Fill();
+        CallForTenders.Height = Dim.Percent(33);
+
+        LeftBody.Add(CallForTenders);
+    }
+
+    private void SetupActions()
+    {
+        Actions.Title = "Actions";
+        Actions.X = Actions.Y = 0;
+        Actions.Width = Actions.Height = Dim.Fill();
+    }
+
+    private void RemoveHeader() { }
+
+    private void RemoveBody() { }
 }
