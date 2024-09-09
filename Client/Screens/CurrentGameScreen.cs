@@ -71,6 +71,7 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
             ReloadWindowTitle();
             if (CurrentView is not null) { await CurrentView.Refresh(CurrentGame); };
             CurrentGameLoading = false;
+            if (data.Status == "InProgress") { CurrentGameStarted = true; }
         });
 
         await hubConnection.StartAsync();
@@ -146,9 +147,9 @@ public class CurrentGameMainView : CurrentGameView
     private GameOverview Game;
     private readonly string PlayerName;
 
-    private readonly FrameView Players = new();
-    private readonly FrameView Status = new();
-    private readonly Button StartButton = new() { Text = "Start Game" };
+    private FrameView? Players;
+    private FrameView? Status;
+    private Button? StartButton;
 
     public EventHandler<HandledEventArgs> OnStart = (_, __) => { };
 
@@ -182,12 +183,15 @@ public class CurrentGameMainView : CurrentGameView
 
     private void SetupPlayers()
     {
-        Players.Title = $"Players ({Game.PlayersCount}/{Game.MaximumPlayersCount})";
-        Players.X = 0;
-        Players.Y = 0;
-        Players.Width = 100;
-        Players.Height = 6 + Game.Players.Count;
-        Players.Enabled = false;
+        Players = new()
+        {
+            Title = $"Players ({Game.PlayersCount}/{Game.MaximumPlayersCount})",
+            X = 0,
+            Y = 0,
+            Width = 100,
+            Height = 6 + Game.Players.Count,
+            Enabled = false
+        };
 
         Add(Players);
 
@@ -198,7 +202,7 @@ public class CurrentGameMainView : CurrentGameView
         dataTable.Columns.Add("Treasury");
         dataTable.Columns.Add("⭐");
 
-        foreach (var player in Game.Players)
+        foreach (var player in Game.Players.ToList())
         {
             dataTable.Rows.Add([
                 player.Name,
@@ -234,11 +238,14 @@ public class CurrentGameMainView : CurrentGameView
 
     private void SetupStatus()
     {
-        Status.Title = "Status";
-        Status.X = Pos.Left(Players);
-        Status.Y = Pos.Bottom(Players) + 2;
-        Status.Width = Players.Width;
-        Status.Height = 3;
+        Status = new()
+        {
+            Title = "Status",
+            X = Pos.Left(Players!),
+            Y = Pos.Bottom(Players!) + 2,
+            Width = Players!.Width,
+            Height = 3
+        };
 
         Add(Status);
 
@@ -251,9 +258,15 @@ public class CurrentGameMainView : CurrentGameView
     {
         if (PlayerName != Game.Players.First().Name) { return; }
 
-        StartButton.X = Pos.Center();
-        StartButton.Y = Pos.Bottom(Status) + 2;
-        StartButton.Width = StartButton.Height = Dim.Auto(DimAutoStyle.Text);
+        StartButton = new()
+        {
+            X = Pos.Center(),
+            Y = Pos.Bottom(Status!) + 2,
+            Width = Dim.Auto(DimAutoStyle.Text),
+            Height = Dim.Auto(DimAutoStyle.Text),
+            Text = "Start Game",
+        };
+
         StartButton.Accept += async (_, __) => await StartGame();
 
         Add(StartButton);
@@ -312,20 +325,20 @@ public class CurrentGameCompanyView : CurrentGameView
     private PlayerOverview CurrentPlayer;
     private readonly string PlayerName;
 
-    private readonly View Header = new();
-    private readonly View Body = new();
-    private readonly View LeftBody = new();
-    private readonly View RightBody = new();
+    private View? Header;
+    private View? Body;
+    private View? LeftBody;
+    private View? RightBody;
 
 
-    private readonly FrameView Player = new();
-    private readonly FrameView Company = new();
-    private readonly FrameView Treasury = new();
-    private readonly FrameView Rounds = new();
-    private readonly FrameView Employees = new();
-    private readonly FrameView Consultants = new();
-    private readonly FrameView CallForTenders = new();
-    private readonly FrameView Actions = new();
+    private FrameView? Player;
+    private FrameView? Company;
+    private FrameView? Treasury;
+    private FrameView? Rounds;
+    private FrameView? Employees;
+    private FrameView? Consultants;
+    private FrameView? CallForTenders;
+    private FrameView? Actions;
 
     public CurrentGameCompanyView(GameOverview game, string playerName)
     {
@@ -356,9 +369,13 @@ public class CurrentGameCompanyView : CurrentGameView
 
     private void SetupHeader()
     {
-        Header.X = Header.Y = 0;
-        Header.Width = Dim.Fill();
-        Header.Height = Dim.Auto(DimAutoStyle.Content);
+        Header = new()
+        {
+            X = 0,
+            Y = 0,
+            Width = Dim.Fill(),
+            Height = Dim.Auto(DimAutoStyle.Content)
+        };
 
         SetupPlayer();
         SetupCompany();
@@ -370,10 +387,13 @@ public class CurrentGameCompanyView : CurrentGameView
 
     private void SetupBody()
     {
-        Body.X = Pos.Left(Header);
-        Body.Y = Pos.Bottom(Header) + 1;
-        Body.Width = Dim.Fill();
-        Body.Height = Dim.Fill();
+        Body = new()
+        {
+            X = 0,
+            Y = Pos.Bottom(Header!) + 1,
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
+        };
 
         SetupLeftBody();
         SetupRightBody();
@@ -383,83 +403,110 @@ public class CurrentGameCompanyView : CurrentGameView
 
     private void SetupLeftBody()
     {
-        LeftBody.X = LeftBody.Y = 0;
-        LeftBody.Width = Dim.Percent(80);
-        LeftBody.Height = Dim.Fill();
+        LeftBody = new()
+        {
+            X = 0,
+            Y = 0,
+            Width = Dim.Percent(80),
+            Height = Dim.Fill()
+        };
 
         SetupEmployees();
         SetupConsultants();
         SetupCallForTenders();
 
-        Body.Add(LeftBody);
+        Body!.Add(LeftBody);
     }
 
     private void SetupRightBody()
     {
-        RightBody.X = Pos.Right(LeftBody);
-        RightBody.Y = Pos.Top(LeftBody);
-        RightBody.Width = Dim.Percent(20);
-        RightBody.Height = Dim.Fill();
+        RightBody = new()
+        {
+            X = Pos.Right(LeftBody!),
+            Y = Pos.Top(LeftBody!),
+            Width = Dim.Percent(20),
+            Height = Dim.Fill()
+        };
 
         SetupActions();
 
-        Body.Add(RightBody);
+        Body!.Add(RightBody);
     }
 
     private void SetupPlayer()
     {
-        Player.Title = "Player";
-        Player.Width = Dim.Percent(25);
-        Player.Height = Dim.Auto(DimAutoStyle.Content);
-        Player.X = 0;
-        Player.Y = 0;
+        Player = new()
+        {
+            Title = "Player",
+            Width = Dim.Percent(25),
+            Height = Dim.Auto(DimAutoStyle.Content),
+            X = 0,
+            Y = 0
+        };
+
         Player.Add(new Label { Text = CurrentPlayer.Name });
 
-        Header.Add(Player);
+        Header!.Add(Player);
     }
 
     private void SetupCompany()
     {
-        Company.Title = "Company";
-        Company.Width = Dim.Percent(25);
-        Company.Height = Dim.Auto(DimAutoStyle.Content);
-        Company.X = Pos.Right(Player);
-        Company.Y = 0;
+        Company = new()
+        {
+            Title = "Company",
+            Width = Dim.Percent(25),
+            Height = Dim.Auto(DimAutoStyle.Content),
+            X = Pos.Right(Player!),
+            Y = 0
+        };
+
         Company.Add(new Label { Text = CurrentPlayer.Company.Name });
 
-        Header.Add(Company);
+        Header!.Add(Company);
     }
 
     private void SetupTreasury()
     {
-        Treasury.Title = "Treasury";
-        Treasury.Width = Dim.Percent(25);
-        Treasury.Height = Dim.Auto(DimAutoStyle.Content);
-        Treasury.X = Pos.Right(Company);
-        Treasury.Y = 0;
+        Treasury = new()
+        {
+            Title = "Treasury",
+            Width = Dim.Percent(25),
+            Height = Dim.Auto(DimAutoStyle.Content),
+            X = Pos.Right(Company!),
+            Y = 0
+        };
+
         Treasury.Add(new Label { Text = $"{CurrentPlayer.Company.Treasury} $" });
 
-        Header.Add(Treasury);
+        Header!.Add(Treasury);
     }
 
     private void SetupRounds()
     {
-        Rounds.Title = "Rounds";
-        Rounds.Width = Dim.Percent(25);
-        Rounds.Height = Dim.Auto(DimAutoStyle.Content);
-        Rounds.X = Pos.Right(Treasury);
-        Rounds.Y = 0;
+        Rounds = new()
+        {
+            Title = "Rounds",
+            Width = Dim.Percent(25),
+            Height = Dim.Auto(DimAutoStyle.Content),
+            X = Pos.Right(Treasury!),
+            Y = 0
+        };
+
         Rounds.Add(new Label { Text = $"{Game.CurrentRound}/{Game.MaximumRounds}" });
 
-        Header.Add(Rounds);
+        Header!.Add(Rounds);
     }
 
     private void SetupEmployees()
     {
-        Employees.Title = "Employees";
-        Employees.X = Employees.Y = 0;
-        Employees.Width = Dim.Fill();
-        Employees.Height = Dim.Percent(33);
+        Employees = new()
+        {
+            Title = "Employees",
+            X = 0,
+            Y = 0,
+            Width = Dim.Fill(),
+            Height = Dim.Percent(33) - 1
+        };
 
         var employeesTree = new TreeView()
         {
@@ -470,14 +517,20 @@ public class CurrentGameCompanyView : CurrentGameView
             BorderStyle = LineStyle.Dotted
         };
 
-        var employeesData = CurrentPlayer.Company.Employees.Select(e =>
+        var employeesData = new List<TreeNode>();
+
+        foreach (var employee in CurrentPlayer.Company.Employees.ToList())
         {
-            var node = new TreeNode($"{e.Name} | {e.Salary} $");
-            e.Skills.ToList().ForEach(s => node.Children.Add(
-                new TreeNode($"{s.Name} | {s.Level}")
-            ));
-            return node;
-        });
+            var node = new TreeNode($"{employee.Name} | {employee.Salary} $");
+            var skills = employee.Skills.ToList();
+
+            foreach (var skill in skills)
+            {
+                node.Children.Add(new TreeNode($"{skill.Name} | {skill.Level}"));
+            }
+
+            employeesData.Add(node);
+        }
 
         employeesTree.BorderStyle = LineStyle.None;
         employeesTree.AddObjects(employeesData);
@@ -485,39 +538,72 @@ public class CurrentGameCompanyView : CurrentGameView
 
         Employees.Add(employeesTree);
 
-        LeftBody.Add(Employees);
+        LeftBody!.Add(Employees);
     }
 
     private void SetupConsultants()
     {
-        Consultants.Title = "Consultants";
-        Consultants.X = Pos.Left(Employees);
-        Consultants.Y = Pos.Bottom(Employees) + 1;
-        Consultants.Width = Dim.Fill();
-        Consultants.Height = Dim.Percent(33);
+        Consultants = new()
+        {
+            Title = "Consultants",
+            X = Pos.Left(Employees!),
+            Y = Pos.Bottom(Employees!) + 2,
+            Width = Dim.Fill(),
+            Height = Dim.Percent(33) - 1
+        };
 
-        LeftBody.Add(Consultants);
+        LeftBody!.Add(Consultants);
     }
 
     private void SetupCallForTenders()
     {
-        CallForTenders.Title = "Call For Tenders";
-        CallForTenders.X = Pos.Left(Consultants);
-        CallForTenders.Y = Pos.Bottom(Consultants) + 1;
-        CallForTenders.Width = Dim.Fill();
-        CallForTenders.Height = Dim.Percent(33);
+        CallForTenders = new()
+        {
+            Title = "Call For Tenders",
+            X = Pos.Left(Consultants!),
+            Y = Pos.Bottom(Consultants!) + 2,
+            Width = Dim.Fill(),
+            Height = Dim.Percent(33) - 1
+        };
 
-        LeftBody.Add(CallForTenders);
+        LeftBody!.Add(CallForTenders);
     }
 
     private void SetupActions()
     {
-        Actions.Title = "Actions";
-        Actions.X = Actions.Y = 0;
-        Actions.Width = Actions.Height = Dim.Fill();
+        Actions = new()
+        {
+            Title = "Actions",
+            X = 0,
+            Y = 0,
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
+        };
+
+        RightBody!.Add(Actions);
     }
 
-    private void RemoveHeader() { }
+    private void RemoveHeader()
+    {
+        Header!.Remove(Player);
+        Header!.Remove(Company);
+        Header!.Remove(Treasury);
+        Header!.Remove(Rounds);
 
-    private void RemoveBody() { }
+        Remove(Header);
+    }
+
+    private void RemoveBody()
+    {
+        LeftBody!.Remove(Employees);
+        LeftBody!.Remove(Consultants);
+        LeftBody!.Remove(CallForTenders);
+
+        RightBody!.Remove(Actions);
+
+        Body!.Remove(LeftBody);
+        Body!.Remove(RightBody);
+
+        Remove(Body);
+    }
 }
