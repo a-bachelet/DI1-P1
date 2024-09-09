@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Net.Http.Json;
@@ -22,6 +24,9 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
 
     private bool CurrentGameLoading = true;
     private bool CurrentGameStarted = false;
+    private bool CurrentGameEnded = false;
+
+    private CurrentGameActionList.Action? CurrentRoundAction = null;
 
     public async Task Show()
     {
@@ -71,7 +76,9 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
             ReloadWindowTitle();
             if (CurrentView is not null) { await CurrentView.Refresh(CurrentGame); };
             CurrentGameLoading = false;
+            CurrentRoundAction = null;
             if (data.Status == "InProgress") { CurrentGameStarted = true; }
+            if (data.Status == "Ended") { CurrentGameEnded = true; }
         });
 
         await hubConnection.StartAsync();
@@ -127,10 +134,16 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
 
         companyView.X = companyView.Y = 5;
         companyView.Width = companyView.Height = Dim.Fill() - 5;
+        companyView.OnRoundAction = (_, roundAction) => { CurrentRoundAction = roundAction; };
 
         Target.Add(companyView);
 
-        while (true)
+        while (CurrentRoundAction is null && !CurrentGameEnded)
+        {
+            await Task.Delay(100);
+        }
+
+        while (!CurrentGameEnded)
         {
             await Task.Delay(100);
         }
@@ -324,12 +337,12 @@ public class CurrentGameCompanyView : CurrentGameView
     private GameOverview Game;
     private PlayerOverview CurrentPlayer;
     private readonly string PlayerName;
+    public EventHandler<CurrentGameActionList.Action> OnRoundAction = (_, __) => { };
 
     private View? Header;
     private View? Body;
     private View? LeftBody;
     private View? RightBody;
-
 
     private FrameView? Player;
     private FrameView? Company;
@@ -505,7 +518,7 @@ public class CurrentGameCompanyView : CurrentGameView
             X = 0,
             Y = 0,
             Width = Dim.Fill(),
-            Height = Dim.Percent(33) - 1
+            Height = Dim.Percent(40)
         };
 
         var employeesTree = new TreeView()
@@ -547,9 +560,9 @@ public class CurrentGameCompanyView : CurrentGameView
         {
             Title = "Consultants",
             X = Pos.Left(Employees!),
-            Y = Pos.Bottom(Employees!) + 2,
+            Y = Pos.Bottom(Employees!) + 1,
             Width = Dim.Fill(),
-            Height = Dim.Percent(33) - 1
+            Height = Dim.Percent(30)
         };
 
         LeftBody!.Add(Consultants);
@@ -561,9 +574,9 @@ public class CurrentGameCompanyView : CurrentGameView
         {
             Title = "Call For Tenders",
             X = Pos.Left(Consultants!),
-            Y = Pos.Bottom(Consultants!) + 2,
+            Y = Pos.Bottom(Consultants!) + 1,
             Width = Dim.Fill(),
-            Height = Dim.Percent(33) - 1
+            Height = Dim.Percent(30)
         };
 
         LeftBody!.Add(CallForTenders);
@@ -579,6 +592,21 @@ public class CurrentGameCompanyView : CurrentGameView
             Width = Dim.Fill(),
             Height = Dim.Fill()
         };
+
+        var actionList = new CurrentGameActionList()
+        {
+            X = 0,
+            Y = 0,
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
+        };
+
+        actionList.OpenSelectedItem += (_, selected) => { OnRoundAction(null, (CurrentGameActionList.Action) selected.Value); };
+
+        Actions.Add(actionList);
+
+        actionList.SetFocus();
+        actionList.MoveHome();
 
         RightBody!.Add(Actions);
     }
@@ -605,5 +633,78 @@ public class CurrentGameCompanyView : CurrentGameView
         Body!.Remove(RightBody);
 
         Remove(Body);
+    }
+}
+
+public class CurrentGameActionList : ListView
+{
+    public enum Action
+    {
+        SEND_EMPLOYEE_FOR_TRAINING,
+        PARTICIPATE_IN_CALL_FOR_TENDERS,
+        RECRUIT_A_CONSULTANT,
+        FIRE_AN_EMPLOYEE,
+        PASS_MY_TURN
+    }
+
+    private readonly CurrentGameActionListDataSource Actions = [
+        Action.SEND_EMPLOYEE_FOR_TRAINING,
+        Action.PARTICIPATE_IN_CALL_FOR_TENDERS,
+        Action.RECRUIT_A_CONSULTANT,
+        Action.FIRE_AN_EMPLOYEE,
+        Action.PASS_MY_TURN
+    ];
+
+    public CurrentGameActionList()
+    {
+        Source = Actions;
+    }
+}
+
+public class CurrentGameActionListDataSource : List<CurrentGameActionList.Action>, IListDataSource
+{
+    public int Length => Count;
+
+    public bool SuspendCollectionChangedEvent { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    public event NotifyCollectionChangedEventHandler CollectionChanged = (_, __) => { };
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
+
+    public bool IsMarked(int item)
+    {
+        return false;
+    }
+
+    public void Render(ListView container, ConsoleDriver driver, bool selected, int item, int col, int line, int width, int start = 0)
+    {
+        switch (item)
+        {
+            case (int) CurrentGameActionList.Action.SEND_EMPLOYEE_FOR_TRAINING:
+                driver.AddStr("Send Employee For Training");
+                break;
+            case (int) CurrentGameActionList.Action.PARTICIPATE_IN_CALL_FOR_TENDERS:
+                driver.AddStr("Participate In Call For Tenders");
+                break;
+            case (int) CurrentGameActionList.Action.RECRUIT_A_CONSULTANT:
+                driver.AddStr("Recruit A Consultant");
+                break;
+            case (int) CurrentGameActionList.Action.FIRE_AN_EMPLOYEE:
+                driver.AddStr("Fire An Employee");
+                break;
+            case (int) CurrentGameActionList.Action.PASS_MY_TURN:
+                driver.AddStr("Pass My Turn");
+                break;
+        }
+    }
+
+    public void SetMark(int item, bool value) { }
+
+    public IList ToList()
+    {
+        return this;
     }
 }

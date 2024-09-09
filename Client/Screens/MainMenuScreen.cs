@@ -8,7 +8,7 @@ namespace Client.Screens;
 public class MainMenuScreen(Window target)
 {
     public Window Target { get; } = target;
-    private MainMenuActionList ActionList = new();
+    private readonly MainMenuActionList ActionList = new();
 
     public MainMenuActionList.Action? Action { get; private set; } = null;
 
