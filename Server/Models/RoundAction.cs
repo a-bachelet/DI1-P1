@@ -1,3 +1,4 @@
+using Server.Hubs.Records;
 using System.Text.Json.Serialization;
 
 namespace Server.Models;
@@ -47,9 +48,7 @@ public class RoundAction(int? playerId)
     public RoundActionOverview ToOverview()
     {
         return new RoundActionOverview(
-            ActionType = "TYPE",
-            Payload = "PAYLOAD",
-            PlayerId
+            "TYPE", "PAYLOAD", (int) PlayerId!
         );
     }
 }

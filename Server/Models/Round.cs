@@ -1,3 +1,5 @@
+using Server.Hubs.Records;
+
 namespace Server.Models;
 
 public class Round(int gameId, int order)
@@ -25,7 +27,7 @@ public class Round(int gameId, int order)
     public RoundOverview ToOverview()
     {
         return new RoundOverview(
-            Actions.Select(async => a.ToOverview()).ToList()
+            Actions.Select(a => a.ToOverview()).ToList()
         );
     }
 }
