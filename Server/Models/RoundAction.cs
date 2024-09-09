@@ -1,5 +1,6 @@
-using Server.Hubs.Records;
 using System.Text.Json.Serialization;
+
+using Server.Hubs.Records;
 
 namespace Server.Models;
 
