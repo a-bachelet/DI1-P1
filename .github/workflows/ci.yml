@@ -90,7 +90,9 @@ jobs:
           mv code-coverage-results.md README.md
           git config --local user.name "${GITHUB_ACTOR}"
           git add README.md
-          git commit -m '[CI] Updated README'
+          if [ -n "$(git diff --cached)" ]; then
+            git commit -m '[CI] Updated README'
+          fi
 
       - name: README push
         uses: ad-m/github-push-action@master

@@ -47,7 +47,8 @@ public class Game(string name, int rounds = 15)
         return new GameOverview(
             Id is null ? 0 : (int) Id, Name, Players.Select(p => p.ToOverview()).ToList(),
             Players.Count, 3, Rounds, RoundsCollection.Count,
-            Status.ToString(), Consultants.Select(c => c.ToOverview()).ToList()
+            Status.ToString(), RoundsCollection.Select(r => r.ToOverview()).ToList(),
+            Consultants.Select(c => c.ToOverview()).ToList()
         );
     }
 }

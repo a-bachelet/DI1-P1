@@ -43,6 +43,15 @@ public class RoundAction(int? playerId)
     protected virtual void ApplyPayload(RoundActionPayload payload) { }
 
     public int? PlayerId { get; init; } = playerId;
+
+    public RoundActionOverview ToOverview()
+    {
+        return new RoundActionOverview(
+            ActionType = "TYPE",
+            Payload = "PAYLOAD",
+            PlayerId
+        );
+    }
 }
 
 public class SendEmployeeForTrainingRoundAction(int? playerId) : RoundAction(playerId)

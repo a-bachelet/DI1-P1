@@ -9,6 +9,7 @@ public sealed record GameOverview(
     int MaximumRounds,
     int CurrentRound,
     string Status,
+    ICollection<RoundOverview> Rounds,
     ICollection<ConsultantOverview> Consultants
 );
 
@@ -50,3 +51,12 @@ public sealed record SkillOverview(
     int Level
 );
 
+public sealed record RoundOverview(
+    ICollection<RoundActionOverview> Actions
+);
+
+public sealed record RoundActionOverview(
+    string ActionType,
+    string Payload,
+    int PlayerId
+);

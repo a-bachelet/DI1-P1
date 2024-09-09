@@ -21,4 +21,11 @@ public class Round(int gameId, int order)
     {
         return Game.Players.All(p => Actions.Any(a => a.PlayerId == p.Id));
     }
+
+    public RoundOverview ToOverview()
+    {
+        return new RoundOverview(
+            Actions.Select(async => a.ToOverview()).ToList()
+        );
+    }
 }
