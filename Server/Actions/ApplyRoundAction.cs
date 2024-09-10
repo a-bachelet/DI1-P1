@@ -54,6 +54,8 @@ public class ApplyRoundAction(
             return Result.Fail($"Game with Id \"{gameId}\" not found.");
         }
 
+        // @todo: Implement the logic for applying the round action
+
         await gameHubService.UpdateCurrentGame(gameId: gameId);
 
         return Result.Ok();

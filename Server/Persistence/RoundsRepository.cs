@@ -13,6 +13,8 @@ public class RoundsRepository(WssDbContext context) : IRoundsRepository
         return await context.Rounds
             .Include(r => r.Game)
             .ThenInclude(g => g.Players)
+            .Include(r => r.Game)
+            .ThenInclude(g => g.RoundsCollection)
             .Include(r => r.Actions)
             .Where(r => r.Id == roundId)
             .FirstOrDefaultAsync();

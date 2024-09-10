@@ -148,14 +148,14 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
 
         while (
             !CurrentGameEnded &&
-            CurrentGame!.CurrentRound != CurrentGame.MaximumRounds &&
+            // CurrentGame!.CurrentRound != CurrentGame.MaximumRounds &&
             CurrentGame!.CurrentRound == lastRound
         )
         {
             await Task.Delay(100);
         }
 
-        if (!CurrentGameEnded && CurrentGame!.CurrentRound != CurrentGame.MaximumRounds)
+        if (!CurrentGameEnded)
         {
             await DisplayCompanyView();
         }
