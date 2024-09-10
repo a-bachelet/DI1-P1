@@ -618,6 +618,36 @@ public class CurrentGameCompanyView : CurrentGameView
             Height = Dim.Percent(30)
         };
 
+        var consultantsTree = new TreeView()
+        {
+            X = 0,
+            Y = 0,
+            Width = Dim.Fill(),
+            Height = Dim.Fill(),
+            BorderStyle = LineStyle.Dotted
+        };
+
+        var consultantsData = new List<TreeNode>();
+
+        foreach (var consultant in Game.Consultants.ToList())
+        {
+            var node = new TreeNode($"{consultant.Name} | {consultant.SalaryRequirement} $");
+            var skills = consultant.Skills.ToList();
+
+            foreach (var skill in skills)
+            {
+                node.Children.Add(new TreeNode($"{skill.Name} | {skill.Level}"));
+            }
+
+            consultantsData.Add(node);
+        }
+
+        consultantsTree.BorderStyle = LineStyle.None;
+        consultantsTree.AddObjects(consultantsData);
+        consultantsTree.ExpandAll();
+
+        Consultants.Add(consultantsTree);
+
         LeftBody!.Add(Consultants);
     }
 

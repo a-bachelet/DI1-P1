@@ -33,7 +33,7 @@ public class GameHubService(IHubContext<GameHub, IGameHubClient> gameHubContext,
     {
         if (game is null && gameId is null) { return; }
 
-        game ??= await gamesRepository.GetForOverviewById((int) gameId!);
+        game = await gamesRepository.GetForOverviewById((int) gameId!);
 
         if (game is null) { return; }
 

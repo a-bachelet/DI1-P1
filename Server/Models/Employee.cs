@@ -2,9 +2,9 @@ using Server.Hubs.Records;
 
 namespace Server.Models;
 
-public class Employee(string name, int companyId, int gameId, int salary) : Consultant(name, salary, gameId)
+public class Employee(string name, int? companyId, int gameId, int salary) : Consultant(name, salary, gameId)
 {
-    public int CompanyId { get; set; } = companyId;
+    public int? CompanyId { get; set; } = companyId;
 
     public Company Company { get; set; } = null!;
 
