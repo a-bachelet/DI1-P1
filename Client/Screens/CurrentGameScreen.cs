@@ -70,11 +70,10 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
             .AddJsonProtocol()
             .Build();
 
-        hubConnection.On<GameOverview>("CurrentGameUpdated", async data =>
+        hubConnection.On<GameOverview>("CurrentGameUpdated", data =>
         {
             CurrentGame = data;
             ReloadWindowTitle();
-            if (CurrentView is not null) { await CurrentView.Refresh(CurrentGame); };
             CurrentGameLoading = false;
             CurrentRoundAction = null;
             if (data.Status == "InProgress") { CurrentGameStarted = true; }
@@ -143,10 +142,64 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
             await Task.Delay(100);
         }
 
-        while (!CurrentGameEnded)
+        var lastRound = CurrentGame!.CurrentRound;
+
+        await ActInRound();
+
+        while (
+            !CurrentGameEnded &&
+            CurrentGame!.CurrentRound != CurrentGame.MaximumRounds &&
+            CurrentGame!.CurrentRound == lastRound
+        )
         {
             await Task.Delay(100);
         }
+
+        if (!CurrentGameEnded && CurrentGame!.CurrentRound != CurrentGame.MaximumRounds)
+        {
+            await DisplayCompanyView();
+        }
+    }
+
+    private async Task ActInRound()
+    {
+        Target.RemoveAll();
+
+        var loadingDialog = new Dialog()
+        {
+            Width = 18,
+            Height = 3
+        };
+
+        var loadingText = new Label()
+        {
+            Text = "Waiting for other players...",
+            X = Pos.Center(),
+            Y = Pos.Center()
+        };
+
+        loadingDialog.Add(loadingText);
+
+        Target.Add(loadingDialog);
+
+        var httpHandler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (_, __, ___, ____) => true
+        };
+
+        var httpClient = new HttpClient(httpHandler)
+        {
+            BaseAddress = new Uri("https://localhost:7032"),
+        };
+
+        var request = httpClient.PostAsJsonAsync($"/rounds/{CurrentGame!.Rounds.MaxBy(r => r.Id)!.Id}/act", new
+        {
+            ActionType = CurrentRoundAction!.ToString(),
+            ActionPayload = "{}",
+            PlayerId = CurrentGame.Players.First(p => p.Name == PlayerName).Id
+        });
+
+        await request;
     }
 }
 
@@ -640,19 +693,19 @@ public class CurrentGameActionList : ListView
 {
     public enum Action
     {
-        SEND_EMPLOYEE_FOR_TRAINING,
-        PARTICIPATE_IN_CALL_FOR_TENDERS,
-        RECRUIT_A_CONSULTANT,
-        FIRE_AN_EMPLOYEE,
-        PASS_MY_TURN
+        SendEmployeeForTraining,
+        ParticipateInCallForTenders,
+        RecruitAConsultant,
+        FireAnEmployee,
+        PassMyTurn
     }
 
     private readonly CurrentGameActionListDataSource Actions = [
-        Action.SEND_EMPLOYEE_FOR_TRAINING,
-        Action.PARTICIPATE_IN_CALL_FOR_TENDERS,
-        Action.RECRUIT_A_CONSULTANT,
-        Action.FIRE_AN_EMPLOYEE,
-        Action.PASS_MY_TURN
+        Action.SendEmployeeForTraining,
+        Action.ParticipateInCallForTenders,
+        Action.RecruitAConsultant,
+        Action.FireAnEmployee,
+        Action.PassMyTurn
     ];
 
     public CurrentGameActionList()
@@ -683,19 +736,19 @@ public class CurrentGameActionListDataSource : List<CurrentGameActionList.Action
     {
         switch (item)
         {
-            case (int) CurrentGameActionList.Action.SEND_EMPLOYEE_FOR_TRAINING:
+            case (int) CurrentGameActionList.Action.SendEmployeeForTraining:
                 driver.AddStr("Send Employee For Training");
                 break;
-            case (int) CurrentGameActionList.Action.PARTICIPATE_IN_CALL_FOR_TENDERS:
+            case (int) CurrentGameActionList.Action.ParticipateInCallForTenders:
                 driver.AddStr("Participate In Call For Tenders");
                 break;
-            case (int) CurrentGameActionList.Action.RECRUIT_A_CONSULTANT:
+            case (int) CurrentGameActionList.Action.RecruitAConsultant:
                 driver.AddStr("Recruit A Consultant");
                 break;
-            case (int) CurrentGameActionList.Action.FIRE_AN_EMPLOYEE:
+            case (int) CurrentGameActionList.Action.FireAnEmployee:
                 driver.AddStr("Fire An Employee");
                 break;
-            case (int) CurrentGameActionList.Action.PASS_MY_TURN:
+            case (int) CurrentGameActionList.Action.PassMyTurn:
                 driver.AddStr("Pass My Turn");
                 break;
         }

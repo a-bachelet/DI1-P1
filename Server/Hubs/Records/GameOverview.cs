@@ -52,6 +52,7 @@ public sealed record SkillOverview(
 );
 
 public sealed record RoundOverview(
+    int Id,
     ICollection<RoundActionOverview> Actions
 );
 

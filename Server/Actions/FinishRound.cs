@@ -57,7 +57,7 @@ public class FinishRound(
         {
             var action = RoundAction.CreateForType(
                 RoundActionType.GenerateNewConsultant,
-                null,
+                0,
                 new GenerateNewConsultantPayload { GameId = round.GameId }
             );
 

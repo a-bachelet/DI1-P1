@@ -27,6 +27,7 @@ public class Round(int gameId, int order)
     public RoundOverview ToOverview()
     {
         return new RoundOverview(
+            Id: Id ?? 0,
             Actions.Select(a => a.ToOverview()).ToList()
         );
     }
