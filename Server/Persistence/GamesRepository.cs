@@ -35,24 +35,11 @@ public class GamesRepository(WssDbContext context) : IGamesRepository
 
     public async Task<Game?> GetForOverviewById(int gameId)
     {
-        var game = await context.Games
+        return await context.Games
             .Include(g => g.Players).ThenInclude(p => p.Company).ThenInclude(c => c.Employees).ThenInclude(e => e.Skills)
+            .Include(g => g.Consultants).ThenInclude(c => c.Skills)
             .Include(g => g.RoundsCollection)
             .FirstOrDefaultAsync(g => g.Id == gameId);
-        
-        game.Consultants.Clear();
-
-        var consultants = await context.Employees
-            .Include(e => e.Skills)
-            .Where(e => e.GameId == gameId && e.CompanyId == null)
-            .ToListAsync();
-
-        foreach (var consultant in consultants)
-        {
-            game?.Consultants.Add(consultant);
-        }
-
-        return game;
     }
 
     public async Task<Game?> GetByPlayerId(int playerId)

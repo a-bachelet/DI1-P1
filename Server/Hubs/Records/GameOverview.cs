@@ -36,14 +36,8 @@ public record ConsultantOverview(
 public sealed record EmployeeOverview(
     int Id,
     string Name,
-    int SalaryRequirement,
     int Salary,
     ICollection<SkillOverview> Skills
-) : ConsultantOverview(
-    Id,
-    Name,
-    SalaryRequirement,
-    Skills
 );
 
 public sealed record SkillOverview(

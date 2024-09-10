@@ -55,9 +55,6 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
         {
             e.ToTable("consultants");
             e.HasKey(e => e.Id);
-            e.HasDiscriminator<string>("ConsultantType")
-                .HasValue<Consultant>("Consultant")
-                .HasValue<Employee>("Employee");
             e.Property(e => e.Name).HasColumnType("varchar(255)");
             e.HasOne(e => e.Game)
                 .WithMany()
@@ -68,11 +65,19 @@ public class WssDbContext(DbContextOptions options, IConfiguration configuration
 
         modelBuilder.Entity<Employee>(e =>
         {
+            e.ToTable("employees");
+            e.HasKey(e => e.Id);
+            e.Property(e => e.Name).HasColumnType("varchar(255)");
+            e.HasOne(e => e.Game)
+                .WithMany()
+                .HasForeignKey(e => e.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
             e.HasOne(e => e.Company)
                 .WithMany(e => e.Employees)
                 .HasForeignKey(e => e.CompanyId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
+            e.OwnsMany(e => e.Skills, builder => builder.ToJson());
         });
 
         modelBuilder.Entity<Game>(e =>
