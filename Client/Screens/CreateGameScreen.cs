@@ -109,7 +109,7 @@ public class CreateGameScreen(Window target)
 
         var httpClient = new HttpClient(httpHandler)
         {
-            BaseAddress = new Uri("https://localhost:7032"),
+            BaseAddress = new Uri($"{WssConfig.WebApiServerScheme}://{WssConfig.WebApiServerDomain}:{WssConfig.WebApiServerPort}"),
         };
 
         var gameName = Form.GameNameField.Text.ToString();

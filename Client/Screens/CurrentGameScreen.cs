@@ -54,7 +54,7 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
     private async Task LoadGame()
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri($"wss://localhost:7032/games/{GameId}"), opts =>
+            .WithUrl(new Uri($"{WssConfig.WebSocketServerScheme}://{WssConfig.WebSocketServerDomain}:{WssConfig.WebSocketServerPort}/games/{GameId}"), opts =>
             {
                 opts.HttpMessageHandlerFactory = (message) =>
                 {
@@ -189,7 +189,7 @@ public class CurrentGameScreen(Window target, int gameId, string playerName)
 
         var httpClient = new HttpClient(httpHandler)
         {
-            BaseAddress = new Uri("https://localhost:7032"),
+            BaseAddress = new Uri($"{WssConfig.WebApiServerScheme}://{WssConfig.WebApiServerDomain}:{WssConfig.WebApiServerPort}"),
         };
 
         var request = httpClient.PostAsJsonAsync($"/rounds/{CurrentGame!.Rounds.MaxBy(r => r.Id)!.Id}/act", new
@@ -368,7 +368,7 @@ public class CurrentGameMainView : CurrentGameView
 
         var httpClient = new HttpClient(httpHandler)
         {
-            BaseAddress = new Uri("https://localhost:7032"),
+            BaseAddress = new Uri($"{WssConfig.WebApiServerScheme}://{WssConfig.WebApiServerDomain}:{WssConfig.WebApiServerPort}"),
         };
 
         var request = httpClient.PostAsJsonAsync($"/games/{Game.Id}/start", new { });

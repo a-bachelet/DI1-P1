@@ -99,7 +99,7 @@ public class JoinGameScreen(Window target)
     private async Task LoadGames()
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri($"wss://localhost:7032/main"), opts =>
+            .WithUrl(new Uri($"{WssConfig.WebSocketServerScheme}://{WssConfig.WebSocketServerDomain}:{WssConfig.WebSocketServerPort}/main"), opts =>
             {
                 opts.HttpMessageHandlerFactory = (message) =>
                 {
@@ -212,7 +212,7 @@ public class JoinGameScreen(Window target)
 
         var httpClient = new HttpClient(httpHandler)
         {
-            BaseAddress = new Uri("https://localhost:7032"),
+            BaseAddress = new Uri($"{WssConfig.WebApiServerScheme}://{WssConfig.WebApiServerDomain}:{WssConfig.WebApiServerPort}"),
         };
 
         var playerName = Form.PlayerNameField.Text.ToString();
