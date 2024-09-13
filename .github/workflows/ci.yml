@@ -86,8 +86,10 @@ jobs:
 
       - name: README update
         run: |
-          rm README.md
-          mv code-coverage-results.md README.md
+          placeholder="<!-- COVERAGE_RESULTS -->"
+          coverage_results=$(cat code-coverage-results.md)
+          sed -i "/$placeholder/{r code-coverage-results.md" -e "d}" README.md
+          rm code-coverage-results.md
           git config --local user.name "${GITHUB_ACTOR}"
           git add README.md
           if [ -n "$(git diff --cached)" ]; then
