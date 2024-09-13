@@ -86,6 +86,7 @@ jobs:
 
       - name: README update
         run: |
+          ls -la
           README_FILE="README.md"
           TEST_FILE="code-coverage-results.md"
           TEST_CONTENT=$(cat "$TEST_FILE")
