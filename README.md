@@ -1,6 +1,7 @@
 # Why So Serious? (WSS)
 
-<!-- COVERAGE_RESULTS -->
+<!-- COVERAGE_RESULTS_START -->
+<!-- COVERAGE_RESULTS_END -->
 
 This repository contains two applications developed using .NET 8:
 1. **WebAPI**: A backend API for handling data and WebSocket connections.
