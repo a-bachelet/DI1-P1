@@ -91,7 +91,8 @@ jobs:
           TEST_CONTENT=$(cat "$TEST_FILE")
           sed -i -e '/<!-- COVERAGE_RESULTS_START -->/,/<!-- COVERAGE_RESULTS_END -->/{//!d;}' -e "/<!-- COVERAGE_RESULTS_START -->/r /dev/stdin" "$README_FILE" <<< "$TEST_CONTENT"
           rm code-coverage-results.md
-          git config --local user.name "${GITHUB_ACTOR}"
+          git config --local user.name "Github CI"
+          git config --local user.email "git@github.com"
           git add README.md
           if [ -n "$(git diff --cached)" ]; then
             git commit -m '[CI] Updated README'
