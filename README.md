@@ -57,6 +57,64 @@ You can access PgAdmin in your browser at http://localhost:8080 with the followi
 - Email: wss@wss.com
 - Password: WSS
 
+## Applying Database Migrations
+
+In order to manage Entity Framework Core (EF Core) migrations, you'll need the dotnet-ef command-line tool.
+
+Follow these steps to install dotnet-ef and apply migrations:
+
+### 1. Install dotnet-ef as a global tool:
+
+Run the following command to install the Entity Framework Core CLI tool globally on your machine:
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+If you already have it installed and need to update to the latest version, use:
+
+```bash
+dotnet tool update --global dotnet-ef
+```
+
+### 2. Apply Migrations:
+
+After installing the tool, you can apply any pending migrations to your database:
+
+- Navigate to your project's directory (the one containing your .csproj file):
+
+```
+cd Server
+```
+
+- Apply migrations to update your database schema:
+
+```bash
+dotnet ef database update
+```
+
+This command will apply the latest migrations in your project to the configured database.
+
+### 3. Creating a New Migration:
+
+If you've made changes to your models and need to create a new migration, use the following command:
+
+```bash
+dotnet ef migrations add <MigrationName>
+```
+
+Replace `<MigrationName>` with a descriptive name for the migration, such as InitialCreate or AddNewField.
+
+### 4. Rollback a Migration:
+
+If you need to revert a migration, run:
+
+```bash
+dotnet ef database update <PreviousMigrationName>
+```
+
+Replace `<PreviousMigrationName>` with the name of the migration.
+
 ## Running the WebAPI
 
 Navigate to the Server project directory:
