@@ -86,11 +86,10 @@ jobs:
 
       - name: README update
         run: |
-          ls -la
           README_FILE="README.md"
           TEST_FILE="code-coverage-results.md"
           TEST_CONTENT=$(cat "$TEST_FILE")
-          sed -i '' -e '/<!-- COVERAGE_RESULTS_START -->/,/<!-- COVERAGE_RESULTS_END -->/{//!d;}' -e "/<!-- COVERAGE_RESULTS_START -->/r /dev/stdin" "$README_FILE" <<< "$TEST_CONTENT"
+          sed -i -e '/<!-- COVERAGE_RESULTS_START -->/,/<!-- COVERAGE_RESULTS_END -->/{//!d;}' -e "/<!-- COVERAGE_RESULTS_START -->/r /dev/stdin" "$README_FILE" <<< "$TEST_CONTENT"
           rm code-coverage-results.md
           git config --local user.name "${GITHUB_ACTOR}"
           git add README.md
