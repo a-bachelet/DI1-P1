@@ -1,6 +1,12 @@
 # Why So Serious? (WSS)
 
 <!-- COVERAGE_RESULTS_START -->
+![Code Coverage](https://img.shields.io/badge/Code%20Coverage-18%25-yellow?style=flat)
+
+Package | Line Rate | Branch Rate | Complexity | Health
+-------- | --------- | ----------- | ---------- | ------
+Server | 18% | 16% | 154 | ➖
+**Summary** | **18%** (64 / 356) | **16%** (17 / 108) | **154** | ➖
 <!-- COVERAGE_RESULTS_END -->
 
 This repository contains two applications developed using .NET 8:
